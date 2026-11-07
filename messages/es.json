@@ -1,0 +1,88 @@
+{
+  "HomePage": {
+    "title": "Bienvenido al sistema Golden Junk", "headline": "Crea tu SaaS",
+    "headlineAccent": "Más rápido que nunca",
+    "intro": "Lanza tu producto SaaS en tiempo récord con nuestra plantilla lista para usar, repleta de tecnologías modernas e integraciones esenciales.",
+    "deploy": "Implementa el tuyo", "reactTitle": "Next.js y React",
+    "reactDescription": "Aprovecha las tecnologías web modernas para obtener un rendimiento y una experiencia de desarrollo óptimos.",
+    "databaseTitle": "Postgres y Drizzle ORM", "databaseDescription": "Una solución robusta de base de datos con un ORM intuitivo para una gestión eficiente y escalable.",
+    "stripeTitle": "Integración con Stripe", "stripeDescription": "Procesa pagos y administra suscripciones con la integración de Stripe.",
+    "ctaTitle": "¿Listo para lanzar tu SaaS?", "ctaDescription": "Nuestra plantilla ofrece todo lo que necesitas para iniciar tu SaaS rápidamente. Concéntrate en lo que hace único a tu producto.",
+    "viewCode": "Ver el código", "copy": "Copiar al portapapeles"
+  },
+  "Menu": {
+    "team": "Equipo", "general": "General", "activity": "Actividad", "security": "Seguridad",
+    "settings": "Configuración", "toggleSidebar": "Alternar barra lateral"
+  },
+  "LanguageSwitcher": {
+    "label": "Seleccione el idioma",
+    "error": "No se pudo cambiar el idioma. Por favor, inténtelo de nuevo."
+  },
+  "Metadata": {"description": "Herramienta de gestión para tu negocio de desguace"},
+  "Header": {"pricing": "Precios", "signUp": "Registrarse", "dashboard": "Panel", "signOut": "Cerrar sesión"},
+  "Theme": {"toggle": "Cambiar tema", "light": "Claro", "dark": "Oscuro", "system": "Sistema"},
+  "Login": {
+    "signInTitle": "Inicia sesión en tu cuenta", "signUpTitle": "Crea tu cuenta", "email": "Correo electrónico",
+    "password": "Contraseña", "emailPlaceholder": "Introduce tu correo electrónico", "passwordPlaceholder": "Introduce tu contraseña",
+    "loading": "Cargando...", "signIn": "Iniciar sesión", "signUp": "Registrarse",
+    "newUser": "¿Eres nuevo en la plataforma?", "existingUser": "¿Ya tienes una cuenta?",
+    "createAccount": "Crear una cuenta", "existingAccount": "Iniciar sesión en una cuenta existente"
+  },
+  "General": {
+    "title": "Configuración general", "accountInformation": "Información de la cuenta", "name": "Nombre",
+    "namePlaceholder": "Introduce tu nombre", "email": "Correo electrónico", "emailPlaceholder": "Introduce tu correo electrónico",
+    "saving": "Guardando...", "save": "Guardar cambios"
+  },
+  "Security": {
+    "title": "Configuración de seguridad", "password": "Contraseña", "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña", "confirmNewPassword": "Confirma la nueva contraseña", "updating": "Actualizando...",
+    "updatePassword": "Actualizar contraseña", "deleteAccount": "Eliminar cuenta",
+    "deleteWarning": "La eliminación de la cuenta es irreversible. Procede con precaución.",
+    "confirmPassword": "Confirma la contraseña", "deleting": "Eliminando..."
+  },
+  "Team": {
+    "title": "Configuración del equipo", "subscription": "Suscripción del equipo", "currentPlan": "Plan actual: {plan}",
+    "free": "Gratis", "billedMonthly": "Facturación mensual", "trialPeriod": "Periodo de prueba",
+    "noSubscription": "Sin suscripción activa", "manageSubscription": "Administrar suscripción",
+    "members": "Miembros del equipo", "unknownUser": "Usuario desconocido", "noMembers": "Todavía no hay miembros en el equipo.",
+    "removing": "Eliminando...", "remove": "Eliminar", "invite": "Invitar a un miembro al equipo",
+    "email": "Correo electrónico", "emailPlaceholder": "Introduce el correo electrónico", "role": "Rol", "member": "Miembro",
+    "owner": "Propietario", "inviting": "Enviando invitación...", "inviteMember": "Invitar miembro",
+    "ownerRequired": "Debes ser propietario del equipo para invitar a nuevos miembros."
+  },
+  "Activity": {
+    "title": "Registro de actividad", "recent": "Actividad reciente", "unknownAction": "Se produjo una acción desconocida",
+    "fromIp": " desde la IP {ip}", "empty": "Aún no hay actividad",
+    "emptyDescription": "Tus actividades, como iniciar sesión o actualizar tu cuenta, aparecerán aquí.",
+    "actions": {
+      "SIGN_UP": "Te registraste", "SIGN_IN": "Iniciaste sesión", "SIGN_OUT": "Cerraste sesión",
+      "UPDATE_PASSWORD": "Cambiaste tu contraseña", "DELETE_ACCOUNT": "Eliminaste tu cuenta",
+      "UPDATE_ACCOUNT": "Actualizaste tu cuenta", "CREATE_TEAM": "Creaste un nuevo equipo",
+      "REMOVE_TEAM_MEMBER": "Eliminaste un miembro del equipo", "INVITE_TEAM_MEMBER": "Invitaste a un miembro al equipo",
+      "ACCEPT_INVITATION": "Aceptaste una invitación"
+    }
+  },
+  "Pricing": {
+    "trial": "con {count, plural, one {# día} other {# días}} de prueba gratis", "perUser": "por usuario / {interval}",
+    "day": "día", "week": "semana", "month": "mes", "year": "año", "unlimitedUsage": "Uso ilimitado",
+    "unlimitedMembers": "Miembros ilimitados en el espacio de trabajo", "emailSupport": "Soporte por correo electrónico",
+    "baseFeatures": "Todo lo incluido en Base, y:", "earlyAccess": "Acceso anticipado a nuevas funciones",
+    "slackSupport": "Soporte 24/7 y acceso a Slack", "loading": "Cargando...", "getStarted": "Empezar"
+  },
+  "NotFound": {"title": "Página no encontrada", "description": "La página que buscas puede haber sido eliminada, renombrada o estar temporalmente no disponible.", "back": "Volver al inicio"},
+  "Validation": {
+    "tooShort": "El valor debe contener al menos {count, plural, one {# carácter} other {# caracteres}}.",
+    "tooLong": "El valor debe contener como máximo {count, plural, one {# carácter} other {# caracteres}}.",
+    "email": "Dirección de correo electrónico no válida.", "invalid": "Comprueba los datos enviados."
+  },
+  "ActionMessages": {
+    "invalidCredentials": "Correo electrónico o contraseña incorrectos. Inténtalo de nuevo.",
+    "createUserFailed": "No se pudo crear el usuario. Inténtalo de nuevo.", "invalidInvitation": "Invitación no válida o caducada.",
+    "createTeamFailed": "No se pudo crear el equipo. Inténtalo de nuevo.", "incorrectCurrentPassword": "La contraseña actual es incorrecta.",
+    "passwordUnchanged": "La nueva contraseña debe ser diferente de la actual.", "passwordMismatch": "La nueva contraseña y la confirmación no coinciden.",
+    "passwordUpdated": "Contraseña actualizada correctamente.", "deleteIncorrectPassword": "Contraseña incorrecta. No se pudo eliminar la cuenta.",
+    "accountUpdated": "Cuenta actualizada correctamente.", "noTeam": "El usuario no pertenece a ningún equipo.",
+    "memberRemoved": "Miembro del equipo eliminado correctamente.", "alreadyMember": "El usuario ya es miembro de este equipo.",
+    "invitationExists": "Ya se ha enviado una invitación a este correo electrónico.", "invitationSent": "Invitación enviada correctamente."
+  }
+}

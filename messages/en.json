@@ -1,0 +1,101 @@
+{
+  "HomePage": {
+    "title": "Welcome to the Golden Junk system",
+    "headline": "Build Your SaaS",
+    "headlineAccent": "Faster Than Ever",
+    "intro": "Launch your SaaS product in record time with our powerful, ready-to-use template. Packed with modern technologies and essential integrations.",
+    "deploy": "Deploy your own",
+    "reactTitle": "Next.js and React",
+    "reactDescription": "Leverage the power of modern web technologies for optimal performance and developer experience.",
+    "databaseTitle": "Postgres and Drizzle ORM",
+    "databaseDescription": "Robust database solution with an intuitive ORM for efficient data management and scalability.",
+    "stripeTitle": "Stripe Integration",
+    "stripeDescription": "Seamless payment processing and subscription management with industry-leading Stripe integration.",
+    "ctaTitle": "Ready to launch your SaaS?",
+    "ctaDescription": "Our template provides everything you need to get your SaaS up and running quickly. Don't waste time on boilerplate - focus on what makes your product unique.",
+    "viewCode": "View the code",
+    "copy": "Copy to clipboard"
+  },
+  "Menu": {
+    "team": "Team",
+    "general": "General",
+    "activity": "Activity",
+    "security": "Security",
+    "settings": "Settings",
+    "toggleSidebar": "Toggle sidebar"
+  },
+  "LanguageSwitcher": {
+    "label": "Select language",
+    "error": "Could not change language. Please try again."
+  },
+  "Metadata": {"description": "Management tool for your junk yard business"},
+  "Header": {"pricing": "Pricing", "signUp": "Sign Up", "dashboard": "Dashboard", "signOut": "Sign out"},
+  "Theme": {"toggle": "Toggle theme", "light": "Light", "dark": "Dark", "system": "System"},
+  "Login": {
+    "signInTitle": "Sign in to your account", "signUpTitle": "Create your account",
+    "email": "Email", "password": "Password", "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password", "loading": "Loading...", "signIn": "Sign in",
+    "signUp": "Sign up", "newUser": "New to our platform?", "existingUser": "Already have an account?",
+    "createAccount": "Create an account", "existingAccount": "Sign in to existing account"
+  },
+  "General": {
+    "title": "General Settings", "accountInformation": "Account Information", "name": "Name",
+    "namePlaceholder": "Enter your name", "email": "Email", "emailPlaceholder": "Enter your email",
+    "saving": "Saving...", "save": "Save Changes"
+  },
+  "Security": {
+    "title": "Security Settings", "password": "Password", "currentPassword": "Current Password",
+    "newPassword": "New Password", "confirmNewPassword": "Confirm New Password",
+    "updating": "Updating...", "updatePassword": "Update Password", "deleteAccount": "Delete Account",
+    "deleteWarning": "Account deletion is irreversible. Please proceed with caution.",
+    "confirmPassword": "Confirm Password", "deleting": "Deleting..."
+  },
+  "Team": {
+    "title": "Team Settings", "subscription": "Team Subscription", "currentPlan": "Current Plan: {plan}",
+    "free": "Free", "billedMonthly": "Billed monthly", "trialPeriod": "Trial period",
+    "noSubscription": "No active subscription", "manageSubscription": "Manage Subscription",
+    "members": "Team Members", "unknownUser": "Unknown User", "noMembers": "No team members yet.",
+    "removing": "Removing...", "remove": "Remove", "invite": "Invite Team Member",
+    "email": "Email", "emailPlaceholder": "Enter email", "role": "Role", "member": "Member",
+    "owner": "Owner", "inviting": "Inviting...", "inviteMember": "Invite Member",
+    "ownerRequired": "You must be a team owner to invite new members."
+  },
+  "Activity": {
+    "title": "Activity Log", "recent": "Recent Activity", "unknownAction": "Unknown action occurred",
+    "fromIp": " from IP {ip}", "empty": "No activity yet",
+    "emptyDescription": "When you perform actions like signing in or updating your account, they'll appear here.",
+    "actions": {
+      "SIGN_UP": "You signed up", "SIGN_IN": "You signed in", "SIGN_OUT": "You signed out",
+      "UPDATE_PASSWORD": "You changed your password", "DELETE_ACCOUNT": "You deleted your account",
+      "UPDATE_ACCOUNT": "You updated your account", "CREATE_TEAM": "You created a new team",
+      "REMOVE_TEAM_MEMBER": "You removed a team member", "INVITE_TEAM_MEMBER": "You invited a team member",
+      "ACCEPT_INVITATION": "You accepted an invitation"
+    }
+  },
+  "Pricing": {
+    "trial": "with {count, plural, one {# day} other {# days}} free trial", "perUser": "per user / {interval}",
+    "day": "day", "week": "week", "month": "month", "year": "year",
+    "unlimitedUsage": "Unlimited Usage", "unlimitedMembers": "Unlimited Workspace Members",
+    "emailSupport": "Email Support", "baseFeatures": "Everything in Base, and:",
+    "earlyAccess": "Early Access to New Features", "slackSupport": "24/7 Support + Slack Access",
+    "loading": "Loading...", "getStarted": "Get Started"
+  },
+  "NotFound": {"title": "Page Not Found", "description": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.", "back": "Back to Home"},
+  "Validation": {
+    "tooShort": "The value must contain at least {count, plural, one {# character} other {# characters}}.",
+    "tooLong": "The value must contain at most {count, plural, one {# character} other {# characters}}.",
+    "email": "Invalid email address.", "invalid": "Please check the submitted information."
+  },
+  "ActionMessages": {
+    "invalidCredentials": "Invalid email or password. Please try again.",
+    "createUserFailed": "Failed to create user. Please try again.",
+    "invalidInvitation": "Invalid or expired invitation.", "createTeamFailed": "Failed to create team. Please try again.",
+    "incorrectCurrentPassword": "Current password is incorrect.",
+    "passwordUnchanged": "New password must be different from the current password.",
+    "passwordMismatch": "New password and confirmation password do not match.",
+    "passwordUpdated": "Password updated successfully.", "deleteIncorrectPassword": "Incorrect password. Account deletion failed.",
+    "accountUpdated": "Account updated successfully.", "noTeam": "User is not part of a team.",
+    "memberRemoved": "Team member removed successfully.", "alreadyMember": "User is already a member of this team.",
+    "invitationExists": "An invitation has already been sent to this email.", "invitationSent": "Invitation sent successfully."
+  }
+}

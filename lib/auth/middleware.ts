@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { TeamDataWithMembers, User } from '@/lib/db/schema';
 import { getTeamForUser, getUser } from '@/lib/db/queries';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 export type ActionState = {
   error?: string;
@@ -14,6 +15,20 @@ type ValidatedActionFunction<S extends z.ZodType<any, any>, T> = (
   formData: FormData
 ) => Promise<T>;
 
+async function translateValidationError(issue: z.ZodIssue) {
+  const t = await getTranslations('Validation');
+  if (issue.code === 'too_small' && typeof issue.minimum === 'number') {
+    return t('tooShort', { count: issue.minimum });
+  }
+  if (issue.code === 'too_big' && typeof issue.maximum === 'number') {
+    return t('tooLong', { count: issue.maximum });
+  }
+  if (issue.code === 'invalid_string' && issue.validation === 'email') {
+    return t('email');
+  }
+  return t('invalid');
+}
+
 export function validatedAction<S extends z.ZodType<any, any>, T>(
   schema: S,
   action: ValidatedActionFunction<S, T>
@@ -21,7 +36,7 @@ export function validatedAction<S extends z.ZodType<any, any>, T>(
   return async (prevState: ActionState, formData: FormData) => {
     const result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
-      return { error: result.error.errors[0].message };
+      return { error: await translateValidationError(result.error.errors[0]) };
     }
 
     return action(result.data, formData);
@@ -46,7 +61,7 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
 
     const result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
-      return { error: result.error.errors[0].message };
+      return { error: await translateValidationError(result.error.errors[0]) };
     }
 
     return action(result.data, formData, user);

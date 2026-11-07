@@ -4,11 +4,16 @@ import { Manrope } from "next/font/google";
 import { getUser, getTeamForUser } from "@/lib/db/queries";
 import { SWRConfig } from "swr";
 import { ThemeProvider } from "@/components/theme-provider";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Golden Junk",
-  description: "Manage tool for your junk yard business",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Metadata");
+  return {
+    title: "Golden Junk",
+    description: t("description"),
+  };
+}
 
 export const viewport: Viewport = {
   maximumScale: 1,
@@ -16,17 +21,14 @@ export const viewport: Viewport = {
 
 const manrope = Manrope({ subsets: ["latin"] });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={manrope.className}
-    >
+    <html lang={locale} suppressHydrationWarning className={manrope.className}>
       <body className="min-h-[100dvh] bg-gray-50 text-gray-950 dark:bg-background dark:text-foreground">
         <ThemeProvider
           attribute="class"
@@ -44,7 +46,7 @@ export default function RootLayout({
               },
             }}
           >
-            {children}
+            <NextIntlClientProvider>{children}</NextIntlClientProvider>
           </SWRConfig>
         </ThemeProvider>
       </body>

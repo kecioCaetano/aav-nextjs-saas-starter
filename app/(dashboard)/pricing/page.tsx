@@ -2,11 +2,13 @@ import { checkoutAction } from '@/lib/payments/actions';
 import { Check } from 'lucide-react';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
 import { SubmitButton } from './submit-button';
+import { getTranslations } from 'next-intl/server';
 
 // Prices are fresh for one hour max
 export const revalidate = 3600;
 
 export default async function PricingPage() {
+  const t = await getTranslations('Pricing');
   const [prices, products] = await Promise.all([
     getStripePrices(),
     getStripeProducts(),
@@ -27,9 +29,9 @@ export default async function PricingPage() {
           interval={basePrice?.interval || 'month'}
           trialDays={basePrice?.trialPeriodDays || 7}
           features={[
-            'Unlimited Usage',
-            'Unlimited Workspace Members',
-            'Email Support',
+            t('unlimitedUsage'),
+            t('unlimitedMembers'),
+            t('emailSupport'),
           ]}
           priceId={basePrice?.id}
         />
@@ -39,9 +41,9 @@ export default async function PricingPage() {
           interval={plusPrice?.interval || 'month'}
           trialDays={plusPrice?.trialPeriodDays || 7}
           features={[
-            'Everything in Base, and:',
-            'Early Access to New Features',
-            '24/7 Support + Slack Access',
+            t('baseFeatures'),
+            t('earlyAccess'),
+            t('slackSupport'),
           ]}
           priceId={plusPrice?.id}
         />
@@ -50,7 +52,7 @@ export default async function PricingPage() {
   );
 }
 
-function PricingCard({
+async function PricingCard({
   name,
   price,
   interval,
@@ -65,16 +67,22 @@ function PricingCard({
   features: string[];
   priceId?: string;
 }) {
+  const t = await getTranslations('Pricing');
+  const translatedInterval =
+    interval === 'day' ? t('day') :
+    interval === 'week' ? t('week') :
+    interval === 'month' ? t('month') :
+    interval === 'year' ? t('year') : interval;
   return (
     <div className="pt-6">
       <h2 className="text-2xl font-medium text-gray-900 dark:text-foreground mb-2">{name}</h2>
       <p className="text-sm text-gray-600 dark:text-muted-foreground mb-4">
-        with {trialDays} day free trial
+        {t('trial', { count: trialDays })}
       </p>
       <p className="text-4xl font-medium text-gray-900 dark:text-foreground mb-6">
         ${price / 100}{' '}
         <span className="text-xl font-normal text-gray-600 dark:text-muted-foreground">
-          per user / {interval}
+          {t('perUser', { interval: translatedInterval })}
         </span>
       </p>
       <ul className="space-y-4 mb-8">

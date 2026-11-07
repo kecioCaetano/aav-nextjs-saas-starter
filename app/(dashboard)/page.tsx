@@ -1,8 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CreditCard, Database } from 'lucide-react';
 import { Terminal } from './terminal';
+import { useTranslations } from 'next-intl';
 
 export default function HomePage() {
+  const t = useTranslations('HomePage');
   return (
     <main>
       <section className="py-20">
@@ -10,13 +12,11 @@ export default function HomePage() {
           <div className="lg:grid lg:grid-cols-12 lg:gap-8">
             <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
               <h1 className="text-4xl font-bold text-gray-900 dark:text-foreground tracking-tight sm:text-5xl md:text-6xl">
-                Build Your SaaS
-                <span className="block text-orange-500">Faster Than Ever</span>
+                {t('headline')}
+                <span className="block text-orange-500">{t('headlineAccent')}</span>
               </h1>
               <p className="mt-3 text-base text-gray-500 dark:text-muted-foreground sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Launch your SaaS product in record time with our powerful,
-                ready-to-use template. Packed with modern technologies and
-                essential integrations.
+                {t('intro')}
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                 <a
@@ -28,7 +28,7 @@ export default function HomePage() {
                     variant="outline"
                     className="text-lg rounded-full"
                   >
-                    Deploy your own
+                    {t('deploy')}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </a>
@@ -55,11 +55,10 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900 dark:text-card-foreground">
-                  Next.js and React
+                  {t('reactTitle')}
                 </h2>
                 <p className="mt-2 text-base text-gray-500 dark:text-muted-foreground">
-                  Leverage the power of modern web technologies for optimal
-                  performance and developer experience.
+                  {t('reactDescription')}
                 </p>
               </div>
             </div>
@@ -70,11 +69,10 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900 dark:text-card-foreground">
-                  Postgres and Drizzle ORM
+                  {t('databaseTitle')}
                 </h2>
                 <p className="mt-2 text-base text-gray-500 dark:text-muted-foreground">
-                  Robust database solution with an intuitive ORM for efficient
-                  data management and scalability.
+                  {t('databaseDescription')}
                 </p>
               </div>
             </div>
@@ -85,11 +83,10 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900 dark:text-card-foreground">
-                  Stripe Integration
+                  {t('stripeTitle')}
                 </h2>
                 <p className="mt-2 text-base text-gray-500 dark:text-muted-foreground">
-                  Seamless payment processing and subscription management with
-                  industry-leading Stripe integration.
+                  {t('stripeDescription')}
                 </p>
               </div>
             </div>
@@ -102,12 +99,10 @@ export default function HomePage() {
           <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-foreground sm:text-4xl">
-                Ready to launch your SaaS?
+                {t('ctaTitle')}
               </h2>
               <p className="mt-3 max-w-3xl text-lg text-gray-500 dark:text-muted-foreground">
-                Our template provides everything you need to get your SaaS up
-                and running quickly. Don't waste time on boilerplate - focus on
-                what makes your product unique.
+                {t('ctaDescription')}
               </p>
             </div>
             <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
@@ -117,7 +112,7 @@ export default function HomePage() {
                   variant="outline"
                   className="text-lg rounded-full"
                 >
-                  View the code
+                  {t('viewCode')}
                   <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
               </a>

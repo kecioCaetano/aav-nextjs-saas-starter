@@ -1,24 +1,27 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { useActionState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
-import { signIn, signUp } from './actions';
-import { ActionState } from '@/lib/auth/middleware';
+import Link from "next/link";
+import Image from "next/image";
+import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
+import { signIn, signUp } from "./actions";
+import { ActionState } from "@/lib/auth/middleware";
+import LanguageSwitcher from "@/src/components/languageSwitcher";
+import { useTranslations } from "next-intl";
 
-export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
+export function Login({ mode = "signin" }: { mode?: "signin" | "signup" }) {
+  const t = useTranslations("Login");
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect');
-  const priceId = searchParams.get('priceId');
-  const inviteId = searchParams.get('inviteId');
+  const redirect = searchParams.get("redirect");
+  const priceId = searchParams.get("priceId");
+  const inviteId = searchParams.get("inviteId");
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    mode === 'signin' ? signIn : signUp,
-    { error: '' }
+    mode === "signin" ? signIn : signUp,
+    { error: "" },
   );
 
   return (
@@ -31,25 +34,24 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             width={48}
             height={48}
           />
+          <LanguageSwitcher />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-foreground">
-          {mode === 'signin'
-            ? 'Sign in to your account'
-            : 'Create your account'}
+          {mode === "signin" ? t("signInTitle") : t("signUpTitle")}
         </h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <form className="space-y-6" action={formAction}>
-          <input type="hidden" name="redirect" value={redirect || ''} />
-          <input type="hidden" name="priceId" value={priceId || ''} />
-          <input type="hidden" name="inviteId" value={inviteId || ''} />
+          <input type="hidden" name="redirect" value={redirect || ""} />
+          <input type="hidden" name="priceId" value={priceId || ""} />
+          <input type="hidden" name="inviteId" value={inviteId || ""} />
           <div>
             <Label
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 dark:text-foreground"
             >
-              Email
+              {t("email")}
             </Label>
             <div className="mt-1">
               <Input
@@ -61,7 +63,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 required
                 maxLength={50}
                 className="appearance-none rounded-full relative block w-full px-3 py-2 border border-gray-300 dark:border-input placeholder-gray-500 dark:placeholder:text-muted-foreground text-gray-900 dark:text-foreground focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your email"
+                placeholder={t("emailPlaceholder")}
               />
             </div>
           </div>
@@ -71,7 +73,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               htmlFor="password"
               className="block text-sm font-medium text-gray-700 dark:text-foreground"
             >
-              Password
+              {t("password")}
             </Label>
             <div className="mt-1">
               <Input
@@ -79,14 +81,14 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 name="password"
                 type="password"
                 autoComplete={
-                  mode === 'signin' ? 'current-password' : 'new-password'
+                  mode === "signin" ? "current-password" : "new-password"
                 }
                 defaultValue={state.password}
                 required
                 minLength={8}
                 maxLength={100}
                 className="appearance-none rounded-full relative block w-full px-3 py-2 border border-gray-300 dark:border-input placeholder-gray-500 dark:placeholder:text-muted-foreground text-gray-900 dark:text-foreground focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your password"
+                placeholder={t("passwordPlaceholder")}
               />
             </div>
           </div>
@@ -104,12 +106,12 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               {pending ? (
                 <>
                   <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                  Loading...
+                  {t("loading")}
                 </>
-              ) : mode === 'signin' ? (
-                'Sign in'
+              ) : mode === "signin" ? (
+                t("signIn")
               ) : (
-                'Sign up'
+                t("signUp")
               )}
             </Button>
           </div>
@@ -122,23 +124,19 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-gray-50 dark:bg-background text-gray-500 dark:text-muted-foreground">
-                {mode === 'signin'
-                  ? 'New to our platform?'
-                  : 'Already have an account?'}
+                {mode === "signin" ? t("newUser") : t("existingUser")}
               </span>
             </div>
           </div>
 
           <div className="mt-6">
             <Link
-              href={`${mode === 'signin' ? '/sign-up' : '/sign-in'}${
-                redirect ? `?redirect=${redirect}` : ''
-              }${priceId ? `&priceId=${priceId}` : ''}`}
+              href={`${mode === "signin" ? "/sign-up" : "/sign-in"}${
+                redirect ? `?redirect=${redirect}` : ""
+              }${priceId ? `&priceId=${priceId}` : ""}`}
               className="w-full flex justify-center py-2 px-4 border border-gray-300 dark:border-border rounded-full shadow-sm text-sm font-medium text-gray-700 dark:text-foreground bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
-              {mode === 'signin'
-                ? 'Create an account'
-                : 'Sign in to existing account'}
+              {mode === "signin" ? t("createAccount") : t("existingAccount")}
             </Link>
           </div>
         </div>

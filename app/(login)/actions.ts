@@ -21,6 +21,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createCheckoutSession } from '@/lib/payments/stripe';
 import { getUser, getUserWithTeam } from '@/lib/db/queries';
+import { getTranslations } from 'next-intl/server';
 import {
   validatedAction,
   validatedActionWithUser
@@ -51,6 +52,7 @@ const signInSchema = z.object({
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
+  const t = await getTranslations('ActionMessages');
 
   const userWithTeam = await db
     .select({
@@ -65,7 +67,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   if (userWithTeam.length === 0) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: t('invalidCredentials'),
       email,
       password
     };
@@ -80,7 +82,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   if (!isPasswordValid) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: t('invalidCredentials'),
       email,
       password
     };
@@ -108,6 +110,7 @@ const signUpSchema = z.object({
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const { email, password, inviteId } = data;
+  const t = await getTranslations('ActionMessages');
 
   const existingUser = await db
     .select()
@@ -117,7 +120,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (existingUser.length > 0) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: t('createUserFailed'),
       email,
       password
     };
@@ -135,7 +138,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (!createdUser) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: t('createUserFailed'),
       email,
       password
     };
@@ -176,7 +179,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         .where(eq(teams.id, teamId))
         .limit(1);
     } else {
-      return { error: 'Invalid or expired invitation.', email, password };
+      return { error: t('invalidInvitation'), email, password };
     }
   } else {
     // Create a new team if there's no invitation
@@ -188,7 +191,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
     if (!createdTeam) {
       return {
-        error: 'Failed to create team. Please try again.',
+        error: t('createTeamFailed'),
         email,
         password
       };
@@ -238,6 +241,7 @@ export const updatePassword = validatedActionWithUser(
   updatePasswordSchema,
   async (data, _, user) => {
     const { currentPassword, newPassword, confirmPassword } = data;
+    const t = await getTranslations('ActionMessages');
 
     const isPasswordValid = await comparePasswords(
       currentPassword,
@@ -249,7 +253,7 @@ export const updatePassword = validatedActionWithUser(
         currentPassword,
         newPassword,
         confirmPassword,
-        error: 'Current password is incorrect.'
+        error: t('incorrectCurrentPassword')
       };
     }
 
@@ -258,7 +262,7 @@ export const updatePassword = validatedActionWithUser(
         currentPassword,
         newPassword,
         confirmPassword,
-        error: 'New password must be different from the current password.'
+        error: t('passwordUnchanged')
       };
     }
 
@@ -267,7 +271,7 @@ export const updatePassword = validatedActionWithUser(
         currentPassword,
         newPassword,
         confirmPassword,
-        error: 'New password and confirmation password do not match.'
+        error: t('passwordMismatch')
       };
     }
 
@@ -283,7 +287,7 @@ export const updatePassword = validatedActionWithUser(
     ]);
 
     return {
-      success: 'Password updated successfully.'
+      success: t('passwordUpdated')
     };
   }
 );
@@ -296,12 +300,13 @@ export const deleteAccount = validatedActionWithUser(
   deleteAccountSchema,
   async (data, _, user) => {
     const { password } = data;
+    const t = await getTranslations('ActionMessages');
 
     const isPasswordValid = await comparePasswords(password, user.passwordHash);
     if (!isPasswordValid) {
       return {
         password,
-        error: 'Incorrect password. Account deletion failed.'
+        error: t('deleteIncorrectPassword')
       };
     }
 
@@ -347,6 +352,7 @@ export const updateAccount = validatedActionWithUser(
   updateAccountSchema,
   async (data, _, user) => {
     const { name, email } = data;
+    const t = await getTranslations('ActionMessages');
     const userWithTeam = await getUserWithTeam(user.id);
 
     await Promise.all([
@@ -354,7 +360,7 @@ export const updateAccount = validatedActionWithUser(
       logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_ACCOUNT)
     ]);
 
-    return { name, success: 'Account updated successfully.' };
+    return { name, success: t('accountUpdated') };
   }
 );
 
@@ -366,10 +372,11 @@ export const removeTeamMember = validatedActionWithUser(
   removeTeamMemberSchema,
   async (data, _, user) => {
     const { memberId } = data;
+    const t = await getTranslations('ActionMessages');
     const userWithTeam = await getUserWithTeam(user.id);
 
     if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
+      return { error: t('noTeam') };
     }
 
     await db
@@ -387,7 +394,7 @@ export const removeTeamMember = validatedActionWithUser(
       ActivityType.REMOVE_TEAM_MEMBER
     );
 
-    return { success: 'Team member removed successfully' };
+    return { success: t('memberRemoved') };
   }
 );
 
@@ -400,10 +407,11 @@ export const inviteTeamMember = validatedActionWithUser(
   inviteTeamMemberSchema,
   async (data, _, user) => {
     const { email, role } = data;
+    const t = await getTranslations('ActionMessages');
     const userWithTeam = await getUserWithTeam(user.id);
 
     if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
+      return { error: t('noTeam') };
     }
 
     const existingMember = await db
@@ -416,7 +424,7 @@ export const inviteTeamMember = validatedActionWithUser(
       .limit(1);
 
     if (existingMember.length > 0) {
-      return { error: 'User is already a member of this team' };
+      return { error: t('alreadyMember') };
     }
 
     // Check if there's an existing invitation
@@ -433,7 +441,7 @@ export const inviteTeamMember = validatedActionWithUser(
       .limit(1);
 
     if (existingInvitation.length > 0) {
-      return { error: 'An invitation has already been sent to this email' };
+      return { error: t('invitationExists') };
     }
 
     // Create a new invitation
@@ -454,6 +462,6 @@ export const inviteTeamMember = validatedActionWithUser(
     // TODO: Send invitation email and include ?inviteId={id} to sign-up URL
     // await sendInvitationEmail(email, userWithTeam.team.name, role)
 
-    return { success: 'Invitation sent successfully' };
+    return { success: t('invitationSent') };
   }
 );

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function Terminal() {
+  const t = useTranslations('HomePage');
   const [terminalStep, setTerminalStep] = useState(0);
   const [copied, setCopied] = useState(false);
   const terminalSteps = [
@@ -43,7 +45,7 @@ export function Terminal() {
           <button
             onClick={copyToClipboard}
             className="text-gray-400 hover:text-white transition-colors"
-            aria-label="Copy to clipboard"
+            aria-label={t('copy')}
           >
             {copied ? (
               <Check className="h-5 w-5" />

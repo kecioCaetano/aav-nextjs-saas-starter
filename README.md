@@ -15,6 +15,11 @@ This is a starter template for building a SaaS application using **Next.js** wit
 - Global middleware to protect logged-in routes
 - Local middleware to protect Server Actions or validate Zod schemas
 - Activity logging system for any user events
+- English, Portuguese, and Spanish interface translations with a language selector
+
+The selected language is stored in a browser cookie. Add or update interface
+translations in `messages/en.json`, `messages/pt.json`, and `messages/es.json`,
+keeping the same message keys in each file.
 - Light, dark, and system theme options, persisted across pages
 
 ## Tech Stack

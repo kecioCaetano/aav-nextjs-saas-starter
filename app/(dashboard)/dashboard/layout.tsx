@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Users, Settings, Shield, Activity, Menu } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function DashboardLayout({
   children,
@@ -13,12 +14,13 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const t = useTranslations("Menu");
 
   const navItems = [
-    { href: "/dashboard", icon: Users, label: "Team" },
-    { href: "/dashboard/general", icon: Settings, label: "General" },
-    { href: "/dashboard/activity", icon: Activity, label: "Activity" },
-    { href: "/dashboard/security", icon: Shield, label: "Security" },
+    { href: "/dashboard", icon: Users, label: t("team") },
+    { href: "/dashboard/general", icon: Settings, label: t("general") },
+    { href: "/dashboard/activity", icon: Activity, label: t("activity") },
+    { href: "/dashboard/security", icon: Shield, label: t("security") },
   ];
 
   return (
@@ -26,7 +28,7 @@ export default function DashboardLayout({
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between bg-white dark:bg-background border-b border-gray-200 dark:border-border p-4">
         <div className="flex items-center">
-          <span className="font-medium">Settings</span>
+          <span className="font-medium">{t("settings")}</span>
         </div>
         <Button
           className="-mr-3"
@@ -34,7 +36,7 @@ export default function DashboardLayout({
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
           <Menu className="h-6 w-6" />
-          <span className="sr-only">Toggle sidebar</span>
+          <span className="sr-only">{t("toggleSidebar")}</span>
         </Button>
       </div>
 
@@ -53,7 +55,9 @@ export default function DashboardLayout({
                 <Button
                   variant={pathname === item.href ? "secondary" : "ghost"}
                   className={`shadow-none my-1 w-full justify-start ${
-                    pathname === item.href ? "bg-gray-100 dark:bg-secondary" : ""
+                    pathname === item.href
+                      ? "bg-gray-100 dark:bg-secondary"
+                      : ""
                   }`}
                   onClick={() => setIsSidebarOpen(false)}
                 >
