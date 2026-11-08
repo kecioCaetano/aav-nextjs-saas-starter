@@ -1,7 +1,6 @@
-import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import test from 'node:test';
 import { createTranslator } from 'next-intl';
+import { expect, test } from 'vitest';
 
 const locales = ['en', 'pt', 'es'];
 
@@ -32,7 +31,7 @@ test('translation catalogs have matching keys and valid messages', async () => {
   for (const [index, messages] of catalogs.entries()) {
     const locale = locales[index];
     const entries = flatten(messages);
-    assert.deepEqual(entries.map(([key]) => key).sort(), expectedKeys, `${locale} keys`);
+    expect(entries.map(([key]) => key).sort(), `${locale} keys`).toEqual(expectedKeys);
 
     const errors = [];
     const translate = createTranslator({
@@ -45,10 +44,10 @@ test('translation catalogs have matching keys and valid messages', async () => {
       const argumentsUsed = [...value.matchAll(/\{(\w+)\s*(?:,|\})/g)]
         .map((match) => match[1])
         .sort();
-      assert.deepEqual(argumentsUsed, expectedArguments.get(key), `${locale} ${key} arguments`);
+      expect(argumentsUsed, `${locale} ${key} arguments`).toEqual(expectedArguments.get(key));
       translate(key, { count: 2, plan: 'Base', interval: 'month', ip: '127.0.0.1' });
     }
 
-    assert.deepEqual(errors, [], `${locale} message formatting`);
+    expect(errors, `${locale} message formatting`).toEqual([]);
   }
 });

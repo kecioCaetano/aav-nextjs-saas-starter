@@ -22,6 +22,36 @@ This is a starter template for building a SaaS application using **Next.js** wit
 The selected language is stored in a browser cookie. Add or update interface
 translations in `messages/en.json`, `messages/pt.json`, and `messages/es.json`,
 keeping the same message keys in each file.
+Run `pnpm test` for the Vitest suite covering translations, preferences,
+session primitives, action validation, and account/team action branches.
+Most action tests mock database and framework boundaries. To include PostgreSQL
+integration tests, set `TEST_DATABASE_URL` to a test database and run `pnpm test`.
+These tests create and drop a uniquely named schema and require permission to
+create schemas. They do not test end-to-end authorization. Pending tests
+identify known gaps around invitation atomicity and team management.
+
+### Browser tests
+
+Install Chromium once with `pnpm exec playwright install chromium`, then run:
+
+```bash
+TEST_DATABASE_URL='postgres://user:password@localhost:5432/test_database' pnpm test:e2e
+```
+
+Use a dedicated test database, never production. The runner creates a unique
+schema, applies the existing migration, starts an isolated Next.js server, and
+drops that schema after the tests. The database user needs permission to
+create and drop schemas. The server uses test-only authentication and Stripe
+credentials and does not exercise Stripe. The default port is 3199; set
+`E2E_PORT` to change it. Playwright arguments can follow the command, for
+example `pnpm test:e2e --grep "sign up"`.
+
+The suite covers authentication, preferences, account and invitation flows,
+and desktop/mobile keyboard navigation. The member invitation authorization
+regression is marked `fixme`: the UI disables the controls, but the server
+action currently accepts a member's forged submission. Cross-team removal
+cannot yet be exercised through the UI because its member-ID validation
+rejects normal form values; see the Vitest TODOs for the remaining gaps.
 
 The text-size selector scales the root font size to 100%, 112.5%, or 125% of
 the browser's default. Tailwind spacing and other `rem`-based dimensions scale
