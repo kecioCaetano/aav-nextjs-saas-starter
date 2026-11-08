@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CircleIcon } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 export default function NotFound() {
@@ -8,7 +8,7 @@ export default function NotFound() {
     <div className="flex items-center justify-center min-h-[100dvh]">
       <div className="max-w-md space-y-8 p-4 text-center">
         <div className="flex justify-center">
-          <CircleIcon className="size-12 text-orange-500" />
+          <Image src="/images/proller-icon.svg" alt="Proller" width={48} height={48} />
         </div>
         <h1 className="text-4xl font-bold text-gray-900 dark:text-foreground tracking-tight">
           {t('title')}

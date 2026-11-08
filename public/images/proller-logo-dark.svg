@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64">
+  <path d="M13 18h25c9 0 14 5 14 13s-5 13-14 13H27v9H13V18Zm14 9v8h10c3 0 4-1.5 4-4s-1-4-4-4H27Z" fill="#f97316" fill-rule="evenodd"/>
+  <path d="m13 47 7-7h7v7l-6 6h-8v-6Zm19 0 7-7h8l-7 7h-8Z" fill="#fed7aa"/>
+  <path d="M65 16v32" stroke="#a1a1aa" stroke-width="1"/>
+  <text x="79" y="43" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="33" font-weight="800" letter-spacing="2">PROLLER</text>
+</svg>

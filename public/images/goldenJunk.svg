@@ -1,69 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 200" width="100%" height="100%">
   <defs>
-    <!-- Rich Metallic Gold Gradient -->
-    <linearGradient id="goldGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#9A7B1C" />
-      <stop offset="20%" stop-color="#E6C654" />
-      <stop offset="50%" stop-color="#FFEFA6" />
-      <stop offset="80%" stop-color="#F1C40F" />
-      <stop offset="100%" stop-color="#B7860B" />
+    <!-- Dark, premium background gradient -->
+    <linearGradient id="bg-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111111" />
+      <stop offset="100%" stop-color="#1a1a1a" />
     </linearGradient>
-
-    <!-- Dark Rust/Shadow Tone for Clashing Accents -->
-    <linearGradient id="rustGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#735405" />
-      <stop offset="100%" stop-color="#3D2B00" />
+    
+    <!-- Vivid high-octane industrial orange gradient -->
+    <linearGradient id="proller-orange" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF7A00" />
+      <stop offset="100%" stop-color="#FF4B00" />
     </linearGradient>
-
-    <!-- Drop Shadow Filter -->
-    <filter id="blockShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000000" flood-opacity="0.25"/>
-    </filter>
+    
+    <!-- Sharp, sheared geometric mask for the industrial aesthetic -->
+    <clipPath id="text-slice">
+      <rect x="0" y="0" width="750" height="200" />
+    </clipPath>
   </defs>
 
-  <g filter="url(#blockShadow)">
-    <!-- JUNK BACKGROUND SCRAP HEAP -->
-    <path d="M40,410 Q90,360 150,380 T290,390 T470,410 Z" fill="url(#goldGrad)" opacity="0.4" />
+  <!-- Solid Premium Background -->
+  <rect width="100%" height="100%" rx="12" fill="url(#bg-dark)" />
+
+  <!-- Main Wordmark Group -->
+  <g transform="translate(60, 135)" clip-path="url(#text-slice)">
     
-    <!-- MAIN CAR BODY (Beat up, angular, cracked silhouette) -->
-    <!-- Broken/Dented Roof line -->
-    <path d="M160,240 Q210,180 275,185 L350,195 L405,255 L445,265 Q465,275 465,300 L445,365 L415,365 C410,330 370,330 365,365 L175,365 C170,330 130,330 125,365 L65,365 Q50,340 55,310 L75,275 Z" fill="url(#goldGrad)" />
+    <!-- Background Shadow layer for aggressive depth -->
+    <text font-family="system-ui, -apple-system, 'Impact', 'Arial Black', sans-serif" font-style="italic" font-weight="900" font-size="120" letter-spacing="-2" fill="#000000" dx="5" dy="5" opacity="0.7">
+      PROLLER
+    </text>
 
-    <!-- REAR WINDOW & SHATTERED FRONT WINDSHIELD -->
-    <path d="M180,242 L250,200 L265,200 L260,250 Z" fill="url(#rustGrad)" opacity="0.3" />
-    <path d="M285,200 L345,205 L385,255 L295,255 Z" fill="url(#rustGrad)" opacity="0.3" />
-    <!-- Windshield Crack Lines -->
-    <path d="M320,210 L340,240 M340,240 L365,245 M340,240 L330,250" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round" />
-
-    <!-- MISSING DOOR / DENTED PANEL LINES -->
-    <!-- Front Door Panel (Hanging off loose) -->
-    <path d="M275,265 L370,265 L360,345 L270,335 Z" fill="url(#goldGrad)" stroke="url(#rustGrad)" stroke-width="3" transform="rotate(3, 320, 300)" />
-    <!-- Exposed Interior/Rust behind missing areas -->
-    <path d="M150,265 L255,265 L255,345 L160,345 Z" fill="url(#rustGrad)" opacity="0.6" />
-    <!-- Falling Off Exhaust Pipe -->
-    <path d="M65,360 Q40,370 30,395" stroke="url(#goldGrad)" stroke-width="7" fill="none" stroke-linecap="round" />
-
-    <!-- BENT JUNK RADIATOR GRILL & CRACKED HOOD -->
-    <path d="M430,285 L455,290 L445,340 L425,335 Z" fill="url(#rustGrad)" opacity="0.5" />
-    <line x1="400" y1="265" x2="445" y2="265" stroke="url(#rustGrad)" stroke-width="4" />
-    <!-- Smashed Headlight hanging by a wire -->
-    <circle cx="440" cy="285" r="10" fill="url(#goldGrad)" stroke="url(#rustGrad)" stroke-width="2" />
-    <path d="M445,295 Q450,310 442,318" stroke="url(#rustGrad)" stroke-width="2" fill="none" />
-
-    <!-- FLAT / BROKEN WHEELS -->
-    <!-- Front Wheel: Missing tire, just a bent golden rim -->
-    <circle cx="390" cy="365" r="24" fill="none" stroke="url(#goldGrad)" stroke-width="6" />
-    <circle cx="390" cy="365" r="12" fill="url(#rustGrad)" />
-    <path d="M375,350 L405,380 M405,350 L375,380" stroke="url(#goldGrad)" stroke-width="3" />
-
-    <!-- Rear Wheel: Completely flat, deflated tire shape -->
-    <path d="M120,345 C145,345 155,385 145,385 L105,385 C95,385 100,345 120,345 Z" fill="url(#rustGrad)" />
-    <circle cx="122" cy="365" r="14" fill="url(#goldGrad)" />
-
-    <!-- GROUND / SMOKE RAYS -->
-    <!-- Cloud of junk smoke/steam from the hood -->
-    <path d="M420,240 Q440,190 410,170 T450,130 T490,140" stroke="url(#goldGrad)" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.5" />
-    <!-- Ground Line -->
-    <line x1="20" y1="385" x2="492" y2="385" stroke="url(#goldGrad)" stroke-width="6" stroke-linecap="round" />
+    <!-- Main Foreground Text featuring the customized Orange & Black division -->
+    <text font-family="system-ui, -apple-system, 'Impact', 'Arial Black', sans-serif" font-style="italic" font-weight="900" font-size="120" letter-spacing="-2">
+      <!-- First half: High-contrast pure white/silver to contrast against black/orange -->
+      <tspan fill="#FFFFFF">PRO</tspan>
+      <!-- Second half: Dual orange gradient for the 'ller' punch -->
+      <tspan fill="url(#proller-orange)">LLER</tspan>
+    </text>
+    
+    <!-- Industrial Accent Lines (Top and Bottom Framing the Text) -->
+    <!-- Left solid black slash anchor -->
+    <line x1="0" y1="-115" x2="40" y2="-115" stroke="#000000" stroke-width="6" stroke-linecap="square" />
+    <!-- Dynamic orange structural speed lines mirroring the font's italics -->
+    <line x1="55" y1="-115" x2="525" y2="-115" stroke="url(#proller-orange)" stroke-width="4" stroke-dasharray="350 15 15 15" />
+    <line x1="0" y1="15" x2="470" y2="15" stroke="url(#proller-orange)" stroke-width="4" stroke-dasharray="15 15 320 15" />
+    <!-- Right solid black slash anchor -->
+    <line x1="485" y1="15" x2="525" y2="15" stroke="#000000" stroke-width="6" stroke-linecap="square" />
   </g>
+
+  <!-- Small Precision Subtitle Tag -->
+  <text x="120" y="180" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="15" letter-spacing="14" fill="#666666">
+    PIONEERING AUTOMATION
+  </text>
 </svg>
+

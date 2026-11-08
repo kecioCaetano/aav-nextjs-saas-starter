@@ -12,6 +12,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Golden Junk",
     description: t("description"),
+    icons: {
+      icon: [{ url: "/images/proller-icon.svg", type: "image/svg+xml" }],
+    },
   };
 }
 

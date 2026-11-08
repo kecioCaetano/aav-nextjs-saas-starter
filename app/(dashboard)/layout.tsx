@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { use, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { CircleIcon, Home, LogOut } from "lucide-react";
+import { Home, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,14 +89,19 @@ function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
           <Image
-            src="/images/goldenJunk.svg"
-            alt="Golden Junk"
-            width={94}
-            height={94}
+            src="/images/proller-logo.svg"
+            alt="Proller"
+            width={165}
+            height={35}
+            className="dark:hidden"
           />
-          <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-foreground">
-            Golden Junk
-          </span>
+          <Image
+            src="/images/proller-logo-dark.svg"
+            alt="Proller"
+            width={165}
+            height={35}
+            className="hidden dark:block"
+          />
         </Link>
         <div className="flex items-center space-x-4">
           <LanguageSwitcher />

@@ -27,12 +27,20 @@ export function Login({ mode = "signin" }: { mode?: "signin" | "signup" }) {
   return (
     <div className="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-background">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
+        <div className="flex flex-wrap items-center justify-center gap-4">
           <Image
-            src="/images/goldenJunk.svg"
-            alt="Golden Junk"
-            width={48}
-            height={48}
+            src="/images/proller-logo.svg"
+            alt="Proller"
+            width={150}
+            height={32}
+            className="dark:hidden"
+          />
+          <Image
+            src="/images/proller-logo-dark.svg"
+            alt="Proller"
+            width={150}
+            height={32}
+            className="hidden dark:block"
           />
           <LanguageSwitcher />
         </div>
