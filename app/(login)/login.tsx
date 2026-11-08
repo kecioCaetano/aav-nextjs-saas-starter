@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { signIn, signUp } from "./actions";
 import { ActionState } from "@/lib/auth/middleware";
 import LanguageSwitcher from "@/src/components/languageSwitcher";
+import FontScaleSwitcher from "@/src/components/fontScaleSwitcher";
 import { useTranslations } from "next-intl";
 
 export function Login({ mode = "signin" }: { mode?: "signin" | "signup" }) {
@@ -27,22 +28,29 @@ export function Login({ mode = "signin" }: { mode?: "signin" | "signup" }) {
   return (
     <div className="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-background">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <Image
-            src="/images/proller-logo.svg"
-            alt="Proller"
-            width={150}
-            height={32}
-            className="dark:hidden"
-          />
-          <Image
-            src="/images/proller-logo-dark.svg"
-            alt="Proller"
-            width={150}
-            height={32}
-            className="hidden dark:block"
-          />
-          <LanguageSwitcher />
+        <div className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)_minmax(0,1.2fr)] items-center gap-2 sm:gap-4 [&_select]:w-full">
+          <Link href="/" className="min-w-0">
+            <Image
+              src="/images/proller-logo.svg"
+              alt="Proller"
+              width={150}
+              height={32}
+              className="h-auto w-full max-w-[150px] dark:hidden"
+            />
+            <Image
+              src="/images/proller-logo-dark.svg"
+              alt="Proller"
+              width={150}
+              height={32}
+              className="hidden h-auto w-full max-w-[150px] dark:block"
+            />
+          </Link>
+          <div className="min-w-0 break-words">
+            <LanguageSwitcher />
+          </div>
+          <div className="min-w-0 break-words">
+            <FontScaleSwitcher />
+          </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-foreground">
           {mode === "signin" ? t("signInTitle") : t("signUpTitle")}

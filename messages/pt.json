@@ -43,6 +43,13 @@
     "settings": "Configurações",
     "toggleSidebar": "Alternar barra lateral"
   },
+  "FontScale": {
+    "label": "Tamanho do texto",
+    "normal": "Texto normal",
+    "large": "Texto grande",
+    "extraLarge": "Texto muito grande",
+    "error": "Não foi possível alterar o tamanho do texto. Tente novamente."
+  },
   "LanguageSwitcher": {
     "label": "Selecione o idioma",
     "error": "Não foi possível alterar o idioma. Por favor, tente novamente."

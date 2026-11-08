@@ -16,11 +16,16 @@ This is a starter template for building a SaaS application using **Next.js** wit
 - Local middleware to protect Server Actions or validate Zod schemas
 - Activity logging system for any user events
 - English, Portuguese, and Spanish interface translations with a language selector
+- Normal, large, and extra-large text sizes, saved in a browser cookie
+- Light, dark, and system theme options, persisted across pages
 
 The selected language is stored in a browser cookie. Add or update interface
 translations in `messages/en.json`, `messages/pt.json`, and `messages/es.json`,
 keeping the same message keys in each file.
-- Light, dark, and system theme options, persisted across pages
+
+The text-size selector scales the root font size to 100%, 112.5%, or 125% of
+the browser's default. Tailwind spacing and other `rem`-based dimensions scale
+alongside text.
 
 ## Tech Stack
 

@@ -18,6 +18,7 @@ import useSWR, { mutate } from "swr";
 import { ModeToggle } from "@/components/ui/modeToggle";
 import Image from "next/image";
 import LanguageSwitcher from "@/src/components/languageSwitcher";
+import FontScaleSwitcher from "@/src/components/fontScaleSwitcher";
 import { useTranslations } from "next-intl";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -37,12 +38,12 @@ function UserMenu() {
   if (!user) {
     return (
       <>
-        <Link
+        {/* <Link
           href="/pricing"
           className="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
         >
           {t("pricing")}
-        </Link>
+        </Link> */}
         <Button asChild className="rounded-full">
           <Link href="/sign-up">{t("signUp")}</Link>
         </Button>
@@ -86,7 +87,7 @@ function UserMenu() {
 function Header() {
   return (
     <header className="border-b border-gray-200 dark:border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap justify-between items-center gap-4">
         <Link href="/" className="flex items-center">
           <Image
             src="/images/proller-logo.svg"
@@ -103,7 +104,8 @@ function Header() {
             className="hidden dark:block"
           />
         </Link>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <FontScaleSwitcher />
           <LanguageSwitcher />
           <ModeToggle />
           <Suspense fallback={<div className="h-9" />}>

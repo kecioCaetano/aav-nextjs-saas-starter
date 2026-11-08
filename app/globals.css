@@ -8,6 +8,18 @@
 
 @variant dark (&:is(.dark *));
 
+html[data-font-scale='normal'] {
+  font-size: 100%;
+}
+
+html[data-font-scale='large'] {
+  font-size: 112.5%;
+}
+
+html[data-font-scale='extra-large'] {
+  font-size: 125%;
+}
+
 @theme {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
