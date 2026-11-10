@@ -44,17 +44,20 @@ test('invites a member and accepts the invitation through sign up', async ({ pag
     await submitAuth(invitee, email, password, 'signup');
     await expect(invitee).toHaveURL(/\/dashboard$/);
     await expect(invitee.getByText(email, { exact: true })).toBeVisible();
+    await expect(invitee.getByText('You must be a team owner to invite new members.')).toBeVisible();
     const verify = postgres(process.env.E2E_DATABASE_URL, { max: 1 });
     try {
       const [membership] = await verify`
-        SELECT i.status, i.team_id AS invited_team, m.team_id AS joined_team, m.role
+        SELECT i.status, i.team_id AS invited_team, m.team_id AS joined_team,
+               m.role, u.role AS user_role
         FROM invitations i
         JOIN users u ON u.email = i.email
         JOIN team_members m ON m.user_id = u.id
         WHERE i.id = ${invitation.id}
       `;
       expect(membership).toMatchObject({
-        status: 'accepted', joined_team: membership.invited_team, role: 'member'
+        status: 'accepted', joined_team: membership.invited_team, role: 'member',
+        user_role: 'member'
       });
     } finally {
       await verify.end();

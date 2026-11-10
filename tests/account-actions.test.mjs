@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => {
   const from = vi.fn(() => ({ leftJoin, where }));
   const returning = vi.fn();
   const values = vi.fn(() => ({ returning }));
-  const updateWhere = vi.fn();
+  const updateWhere = vi.fn(() => ({ returning }));
   const set = vi.fn(() => ({ where: updateWhere }));
   return {
     getUser: vi.fn(), getUserWithTeam: vi.fn(), comparePasswords: vi.fn(),
@@ -24,7 +24,8 @@ const mocks = vi.hoisted(() => {
       select: vi.fn(() => ({ from })),
       insert: vi.fn(() => ({ values })),
       update: vi.fn(() => ({ set })),
-      delete: vi.fn(() => ({ where: updateWhere }))
+      delete: vi.fn(() => ({ where: updateWhere })),
+      transaction: vi.fn()
     },
     limit, where, values, returning, set, updateWhere
   };
@@ -70,6 +71,7 @@ beforeEach(() => {
   mocks.hashPassword.mockResolvedValue('new-hash');
   mocks.limit.mockResolvedValue([]);
   mocks.returning.mockResolvedValue([user]);
+  mocks.db.transaction.mockImplementation((callback) => callback(mocks.db));
   mocks.redirect.mockImplementation((path) => { throw new Error(`redirect:${path}`); });
 });
 
@@ -144,16 +146,24 @@ describe('account actions', () => {
     expect(mocks.cookies).not.toHaveBeenCalled();
   });
 
-  it('rejects an invalid invitation without creating a membership or session', async () => {
+  it('rejects an invalid invitation before creating a user or session', async () => {
+    mocks.returning.mockResolvedValueOnce([]);
     expect(await signUp({}, form({
       email: 'new@example.com', password: 'new-password', inviteId: '123'
     }))).toMatchObject({ error: 'invalidInvitation' });
-    expect(mocks.db.insert).toHaveBeenCalledOnce();
-    expect(mocks.db.insert).toHaveBeenCalledWith(users);
+    expect(mocks.db.insert).not.toHaveBeenCalled();
     expect(mocks.setSession).not.toHaveBeenCalled();
   });
 
-  it.todo('does not persist a newly registered user when the invitation is invalid');
+  it.each(['abc', '1abc', '0', '-1', '2147483648'])(
+    'rejects malformed invitation ID %s before starting a transaction', async (inviteId) => {
+      expect(await signUp({}, form({
+        email: 'new@example.com', password: 'new-password', inviteId
+      }))).toMatchObject({ error: 'invalidInvitation' });
+      expect(mocks.db.transaction).not.toHaveBeenCalled();
+      expect(mocks.db.insert).not.toHaveBeenCalled();
+    }
+  );
 });
 
 describe('team invitations', () => {

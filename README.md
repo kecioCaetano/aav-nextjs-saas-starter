@@ -28,7 +28,7 @@ Most action tests mock database and framework boundaries. To include PostgreSQL
 integration tests, set `TEST_DATABASE_URL` to a test database and run `pnpm test`.
 These tests create and drop a uniquely named schema and require permission to
 create schemas. They do not test end-to-end authorization. Pending tests
-identify known gaps around invitation atomicity and team management.
+identify known gaps around team management.
 
 ### Browser tests
 

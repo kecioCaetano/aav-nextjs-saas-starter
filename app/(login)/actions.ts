@@ -9,9 +9,6 @@ import {
   teams,
   teamMembers,
   activityLogs,
-  type NewUser,
-  type NewTeam,
-  type NewTeamMember,
   type NewActivityLog,
   ActivityType,
   invitations
@@ -31,7 +28,8 @@ async function logActivity(
   teamId: number | null | undefined,
   userId: number,
   type: ActivityType,
-  ipAddress?: string
+  ipAddress?: string,
+  database: Pick<typeof db, 'insert'> = db
 ) {
   if (teamId === null || teamId === undefined) {
     return;
@@ -42,7 +40,7 @@ async function logActivity(
     action: type,
     ipAddress: ipAddress || ''
   };
-  await db.insert(activityLogs).values(newActivity);
+  await database.insert(activityLogs).values(newActivity);
 }
 
 const signInSchema = z.object({
@@ -108,6 +106,8 @@ const signUpSchema = z.object({
   inviteId: z.string().optional()
 });
 
+class SignupUserAlreadyExists extends Error {}
+
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const { email, password, inviteId } = data;
   const t = await getTranslations('ActionMessages');
@@ -119,106 +119,97 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     .limit(1);
 
   if (existingUser.length > 0) {
-    return {
-      error: t('createUserFailed'),
-      email,
-      password
-    };
+    return { error: t('createUserFailed'), email, password };
+  }
+
+  const invitationId = inviteId ? Number(inviteId) : null;
+  if (
+    inviteId &&
+    (!/^[1-9]\d*$/.test(inviteId) ||
+      !Number.isSafeInteger(invitationId) ||
+      Number(invitationId) > 2147483647)
+  ) {
+    return { error: t('invalidInvitation'), email, password };
   }
 
   const passwordHash = await hashPassword(password);
+  let result;
+  try {
+    result = await db.transaction(async (tx) => {
+      let invitation: typeof invitations.$inferSelect | undefined;
+      if (invitationId !== null) {
+        [invitation] = await tx
+          .update(invitations)
+          .set({ status: 'accepted' })
+          .where(
+            and(
+              eq(invitations.id, invitationId),
+              eq(invitations.email, email),
+              eq(invitations.status, 'pending')
+            )
+          )
+          .returning();
 
-  const newUser: NewUser = {
-    email,
-    passwordHash,
-    role: 'owner' // Default role, will be overridden if there's an invitation
-  };
+        if (!invitation) return { invalidInvitation: true as const };
+      }
 
-  const [createdUser] = await db.insert(users).values(newUser).returning();
+      const [createdUser] = await tx
+        .insert(users)
+        .values({
+          email,
+          passwordHash,
+          role: invitation?.role ?? 'owner'
+        })
+        .onConflictDoNothing({ target: users.email })
+        .returning();
 
-  if (!createdUser) {
-    return {
-      error: t('createUserFailed'),
-      email,
-      password
-    };
+      if (!createdUser) throw new SignupUserAlreadyExists();
+
+      let createdTeam: typeof teams.$inferSelect;
+      if (invitation) {
+        const [team] = await tx
+          .select()
+          .from(teams)
+          .where(eq(teams.id, invitation.teamId))
+          .limit(1);
+        if (!team) throw new Error('Invited team not found');
+        createdTeam = team;
+        await logActivity(team.id, createdUser.id, ActivityType.ACCEPT_INVITATION, undefined, tx);
+      } else {
+        const [team] = await tx
+          .insert(teams)
+          .values({ name: `${email}'s Team` })
+          .returning();
+        if (!team) throw new Error('Failed to create team');
+        createdTeam = team;
+        await logActivity(team.id, createdUser.id, ActivityType.CREATE_TEAM, undefined, tx);
+      }
+
+      await tx.insert(teamMembers).values({
+        userId: createdUser.id,
+        teamId: createdTeam.id,
+        role: invitation?.role ?? 'owner'
+      });
+      await logActivity(createdTeam.id, createdUser.id, ActivityType.SIGN_UP, undefined, tx);
+      return { createdUser, createdTeam };
+    });
+  } catch (error) {
+    if (error instanceof SignupUserAlreadyExists) {
+      return { error: t('createUserFailed'), email, password };
+    }
+    throw error;
   }
 
-  let teamId: number;
-  let userRole: string;
-  let createdTeam: typeof teams.$inferSelect | null = null;
-
-  if (inviteId) {
-    // Check if there's a valid invitation
-    const [invitation] = await db
-      .select()
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.id, parseInt(inviteId)),
-          eq(invitations.email, email),
-          eq(invitations.status, 'pending')
-        )
-      )
-      .limit(1);
-
-    if (invitation) {
-      teamId = invitation.teamId;
-      userRole = invitation.role;
-
-      await db
-        .update(invitations)
-        .set({ status: 'accepted' })
-        .where(eq(invitations.id, invitation.id));
-
-      await logActivity(teamId, createdUser.id, ActivityType.ACCEPT_INVITATION);
-
-      [createdTeam] = await db
-        .select()
-        .from(teams)
-        .where(eq(teams.id, teamId))
-        .limit(1);
-    } else {
-      return { error: t('invalidInvitation'), email, password };
-    }
-  } else {
-    // Create a new team if there's no invitation
-    const newTeam: NewTeam = {
-      name: `${email}'s Team`
-    };
-
-    [createdTeam] = await db.insert(teams).values(newTeam).returning();
-
-    if (!createdTeam) {
-      return {
-        error: t('createTeamFailed'),
-        email,
-        password
-      };
-    }
-
-    teamId = createdTeam.id;
-    userRole = 'owner';
-
-    await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
+  if ('invalidInvitation' in result) {
+    return { error: t('invalidInvitation'), email, password };
   }
 
-  const newTeamMember: NewTeamMember = {
-    userId: createdUser.id,
-    teamId: teamId,
-    role: userRole
-  };
-
-  await Promise.all([
-    db.insert(teamMembers).values(newTeamMember),
-    logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
-    setSession(createdUser)
-  ]);
+  await setSession(result.createdUser);
 
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {
     const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: createdTeam, priceId });
+    return createCheckoutSession({ team: result.createdTeam, priceId });
   }
 
   redirect('/dashboard');

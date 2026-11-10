@@ -27,3 +27,23 @@ junk yard.
 training strategy for the towing drivers
 
 managing assets.
+
+check Effect TypeScript library, for future
+
+https://portal.ct.gov/deep/p2/industry/vehicle-repair-and-body-shops-p2-fact-sheet-index
+Antifreeze > keep in containers for recycling
+batteries (lead) > keep storage to recycle
+Mercury Switches > Use a plastic container instead to appropriate disposal
+Refrigerants > trained and certified in the proper use of refrigerant recovery
+and recycling equipment.
+Tires > store for recycling
+
+oil > crankcase (engine) oil, brake fluid,
+automatic transmission fluid, power steering fluid, liquid and semi-solid gear, chain, and ball
+bearing lubricants, and hydraulic fluid. Used oils can be mixed and managed together.
+
+Waste Fuel, Tanks & Filters > containers
+
+auto recycler self-serve yard?
+
+change on Linkedin tittle for: forward deployed engineer (FDE)
