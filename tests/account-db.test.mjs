@@ -92,6 +92,69 @@ describe.skipIf(!databaseUrl)('account and team actions with PostgreSQL', () => 
     expect(stored[0]).toMatchObject({
       teamId: team.id, invitedBy: owner.id, role: 'member', status: 'pending'
     });
+    expect(await mocks.db.select().from(activityLogs)
+      .where(eq(activityLogs.action, 'INVITE_TEAM_MEMBER')))
+      .toEqual([expect.objectContaining({ teamId: team.id, userId: owner.id })]);
+  });
+
+  it('rejects invitations by a member even if their user role is owner', async () => {
+    const [actor] = await mocks.db.insert(users).values({
+      email: 'member-actor@example.test', passwordHash: 'unused', role: 'owner'
+    }).returning();
+    await mocks.db.insert(teamMembers).values({
+      userId: actor.id, teamId: team.id, role: 'member'
+    });
+    mocks.getUser.mockResolvedValue(actor);
+    const before = await mocks.db.select().from(activityLogs)
+      .where(eq(activityLogs.action, 'INVITE_TEAM_MEMBER'));
+    expect(await actions.inviteTeamMember({}, form({
+      email: 'forbidden@example.test', role: 'owner'
+    }))).toEqual({ error: 'inviteOwnerRequired' });
+    expect(await mocks.db.select().from(invitations)
+      .where(eq(invitations.email, 'forbidden@example.test'))).toHaveLength(0);
+    expect(await mocks.db.select().from(activityLogs)
+      .where(eq(activityLogs.action, 'INVITE_TEAM_MEMBER'))).toHaveLength(before.length);
+  });
+
+  it('rolls back the invitation if activity logging fails', async () => {
+    const email = 'invitation-rollback@example.test';
+    await client.unsafe(`
+      CREATE FUNCTION fail_invite_activity() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN
+        IF NEW.action = 'INVITE_TEAM_MEMBER' THEN RAISE EXCEPTION 'test invitation failure'; END IF;
+        RETURN NEW;
+      END $$;
+      CREATE TRIGGER fail_invite_activity BEFORE INSERT ON activity_logs
+      FOR EACH ROW EXECUTE FUNCTION fail_invite_activity();
+    `);
+    try {
+      await expect(actions.inviteTeamMember({}, form({ email, role: 'member' })))
+        .rejects.toThrow('test invitation failure');
+      expect(await mocks.db.select().from(invitations)
+        .where(eq(invitations.email, email))).toHaveLength(0);
+    } finally {
+      await client.unsafe('DROP TRIGGER fail_invite_activity ON activity_logs');
+      await client.unsafe('DROP FUNCTION fail_invite_activity()');
+    }
+  });
+
+  it('serializes concurrent invitations by different owners of the same team', async () => {
+    const [secondOwner] = await mocks.db.insert(users).values({
+      email: 'second-owner@example.test', passwordHash: 'unused', role: 'owner'
+    }).returning();
+    await mocks.db.insert(teamMembers).values({
+      userId: secondOwner.id, teamId: team.id, role: 'owner'
+    });
+    mocks.getUser.mockResolvedValueOnce(owner).mockResolvedValueOnce(secondOwner);
+    const email = 'concurrent-invite@example.test';
+    const results = await Promise.all([
+      actions.inviteTeamMember({}, form({ email, role: 'member' })),
+      actions.inviteTeamMember({}, form({ email, role: 'member' }))
+    ]);
+    expect(results).toContainEqual({ success: 'invitationSent' });
+    expect(results).toContainEqual({ error: 'invitationExists' });
+    expect(await mocks.db.select().from(invitations)
+      .where(eq(invitations.email, email))).toHaveLength(1);
   });
 
   it('rejects inviting an existing member without inserting an invitation', async () => {
@@ -106,6 +169,94 @@ describe.skipIf(!databaseUrl)('account and team actions with PostgreSQL', () => 
     }))).toEqual({ error: 'alreadyMember' });
     expect(await mocks.db.select().from(invitations)
       .where(eq(invitations.email, member.email))).toHaveLength(0);
+  });
+
+  it('removes a team member and records the activity', async () => {
+    const [user] = await mocks.db.insert(users).values({
+      email: 'remove@example.test', passwordHash: 'unused'
+    }).returning();
+    const [member] = await mocks.db.insert(teamMembers).values({
+      userId: user.id, teamId: team.id, role: 'member'
+    }).returning();
+    expect(await actions.removeTeamMember({}, form({ memberId: String(member.id) })))
+      .toEqual({ success: 'memberRemoved' });
+    expect(await mocks.db.select().from(teamMembers)
+      .where(eq(teamMembers.id, member.id))).toHaveLength(0);
+    expect(await mocks.db.select().from(activityLogs)
+      .where(eq(activityLogs.action, 'REMOVE_TEAM_MEMBER')))
+      .toEqual([expect.objectContaining({ teamId: team.id, userId: owner.id })]);
+  });
+
+  it('does not remove a member from another team or log a removal', async () => {
+    const [otherTeam] = await mocks.db.insert(teams).values({ name: 'Other team' }).returning();
+    const [user] = await mocks.db.insert(users).values({
+      email: 'other-team@example.test', passwordHash: 'unused'
+    }).returning();
+    const [member] = await mocks.db.insert(teamMembers).values({
+      userId: user.id, teamId: otherTeam.id, role: 'member'
+    }).returning();
+    const before = await mocks.db.select().from(activityLogs)
+      .where(eq(activityLogs.action, 'REMOVE_TEAM_MEMBER'));
+    expect(await actions.removeTeamMember({}, form({ memberId: String(member.id) })))
+      .toEqual({ error: 'memberNotFound' });
+    expect(await mocks.db.select().from(teamMembers)
+      .where(eq(teamMembers.id, member.id))).toHaveLength(1);
+    expect(await mocks.db.select().from(activityLogs)
+      .where(eq(activityLogs.action, 'REMOVE_TEAM_MEMBER'))).toHaveLength(before.length);
+  });
+
+  it('rejects removal by a non-owner', async () => {
+    const [actor] = await mocks.db.insert(users).values({
+      email: 'actor@example.test', passwordHash: 'unused', role: 'owner'
+    }).returning();
+    await mocks.db.insert(teamMembers).values({ userId: actor.id, teamId: team.id, role: 'member' });
+    const [targetUser] = await mocks.db.insert(users).values({
+      email: 'target@example.test', passwordHash: 'unused'
+    }).returning();
+    const [target] = await mocks.db.insert(teamMembers).values({
+      userId: targetUser.id, teamId: team.id, role: 'member'
+    }).returning();
+    mocks.getUser.mockResolvedValue(actor);
+    expect(await actions.removeTeamMember({}, form({ memberId: String(target.id) })))
+      .toEqual({ error: 'ownerRequired' });
+    expect(await mocks.db.select().from(teamMembers)
+      .where(eq(teamMembers.id, target.id))).toHaveLength(1);
+  });
+
+  it('does not allow an owner to remove their own membership', async () => {
+    const [membership] = await mocks.db.select().from(teamMembers)
+      .where(eq(teamMembers.userId, owner.id));
+    expect(await actions.removeTeamMember({}, form({ memberId: String(membership.id) })))
+      .toEqual({ error: 'cannotRemoveSelf' });
+    expect(await mocks.db.select().from(teamMembers)
+      .where(eq(teamMembers.id, membership.id))).toHaveLength(1);
+  });
+
+  it('rolls back member removal if activity logging fails', async () => {
+    const [user] = await mocks.db.insert(users).values({
+      email: 'remove-rollback@example.test', passwordHash: 'unused'
+    }).returning();
+    const [member] = await mocks.db.insert(teamMembers).values({
+      userId: user.id, teamId: team.id, role: 'member'
+    }).returning();
+    await client.unsafe(`
+      CREATE FUNCTION fail_removal_activity() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN
+        IF NEW.action = 'REMOVE_TEAM_MEMBER' THEN RAISE EXCEPTION 'test removal failure'; END IF;
+        RETURN NEW;
+      END $$;
+      CREATE TRIGGER fail_removal_activity BEFORE INSERT ON activity_logs
+      FOR EACH ROW EXECUTE FUNCTION fail_removal_activity();
+    `);
+    try {
+      await expect(actions.removeTeamMember({}, form({ memberId: String(member.id) })))
+        .rejects.toThrow('test removal failure');
+      expect(await mocks.db.select().from(teamMembers)
+        .where(eq(teamMembers.id, member.id))).toHaveLength(1);
+    } finally {
+      await client.unsafe('DROP TRIGGER fail_removal_activity ON activity_logs');
+      await client.unsafe('DROP FUNCTION fail_removal_activity()');
+    }
   });
 
   it('rejects an invalid invitation without creating a user or session', async () => {

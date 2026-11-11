@@ -27,8 +27,8 @@ session primitives, action validation, and account/team action branches.
 Most action tests mock database and framework boundaries. To include PostgreSQL
 integration tests, set `TEST_DATABASE_URL` to a test database and run `pnpm test`.
 These tests create and drop a uniquely named schema and require permission to
-create schemas. They do not test end-to-end authorization. Pending tests
-identify known gaps around team management.
+create schemas. They cover team invitation authorization and transaction
+rollback; browser tests also exercise authorization at the action boundary.
 
 ### Browser tests
 
@@ -47,11 +47,9 @@ credentials and does not exercise Stripe. The default port is 3199; set
 example `pnpm test:e2e --grep "sign up"`.
 
 The suite covers authentication, preferences, account and invitation flows,
-and desktop/mobile keyboard navigation. The member invitation authorization
-regression is marked `fixme`: the UI disables the controls, but the server
-action currently accepts a member's forged submission. Cross-team removal
-cannot yet be exercised through the UI because its member-ID validation
-rejects normal form values; see the Vitest TODOs for the remaining gaps.
+and desktop/mobile keyboard navigation. The suite also checks that a member
+cannot bypass disabled invitation controls. Cross-team removal is checked in
+the database integration tests.
 
 The text-size selector scales the root font size to 100%, 112.5%, or 125% of
 the browser's default. Tailwind spacing and other `rem`-based dimensions scale

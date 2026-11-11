@@ -85,12 +85,50 @@ test('the invitation controls are disabled for a member', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Invite Member' })).toBeDisabled();
 });
 
-test.fixme('a member cannot bypass disabled invitation controls', async ({ page }) => {
+test('removes a team member and updates the member list', async ({ page }) => {
+  const ownerEmail = await signup(page);
+  const firstEmail = uniqueEmail();
+  const secondEmail = uniqueEmail();
+  const sql = postgres(process.env.E2E_DATABASE_URL, { max: 1 });
+  try {
+    const [team] = await sql`
+      SELECT m.team_id FROM team_members m JOIN users u ON u.id = m.user_id
+      WHERE u.email = ${ownerEmail}
+    `;
+    for (const email of [firstEmail, secondEmail]) {
+      const [user] = await sql`
+        INSERT INTO users (email, password_hash, role)
+        VALUES (${email}, 'unused', 'member') RETURNING id
+      `;
+      await sql`
+        INSERT INTO team_members (user_id, team_id, role)
+        VALUES (${user.id}, ${team.team_id}, 'member')
+      `;
+    }
+    await page.reload();
+    await expect(page.locator('li').filter({ hasText: firstEmail })
+      .getByRole('button', { name: 'Remove' })).toBeVisible();
+    const memberRow = page.locator('li').filter({ hasText: secondEmail });
+    await expect(memberRow.getByRole('button', { name: 'Remove' })).toBeVisible();
+    await memberRow.getByRole('button', { name: 'Remove' }).click();
+    await expect(page.getByText('Team member removed successfully.')).toBeVisible();
+    await expect(page.getByText(secondEmail, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(firstEmail, { exact: true })).toBeVisible();
+    const [membership] = await sql`
+      SELECT count(*)::int AS count FROM team_members m JOIN users u ON u.id = m.user_id
+      WHERE u.email = ${secondEmail} AND m.team_id = ${team.team_id}
+    `;
+    expect(membership.count).toBe(0);
+  } finally {
+    await sql.end();
+  }
+});
+
+test('a member cannot bypass disabled invitation controls', async ({ page }) => {
   const memberEmail = await signup(page);
   const inviteEmail = uniqueEmail();
   const sql = postgres(process.env.E2E_DATABASE_URL, { max: 1 });
   try {
-    await sql`UPDATE users SET role = 'member' WHERE email = ${memberEmail}`;
     await sql`
       UPDATE team_members SET role = 'member'
       WHERE user_id = (SELECT id FROM users WHERE email = ${memberEmail})
@@ -108,6 +146,7 @@ test.fixme('a member cannot bypass disabled invitation controls', async ({ page 
       ),
       form.evaluate((element) => element.requestSubmit())
     ]);
+    await expect(page.getByText('Only team owners can invite members.')).toBeVisible();
     const rows = await sql`SELECT id FROM invitations WHERE email = ${inviteEmail}`;
     expect(rows).toHaveLength(0);
   } finally {

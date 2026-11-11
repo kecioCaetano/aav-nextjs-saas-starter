@@ -69,6 +69,7 @@ beforeEach(() => {
   mocks.getTranslations.mockResolvedValue((key) => key);
   mocks.comparePasswords.mockResolvedValue(true);
   mocks.hashPassword.mockResolvedValue('new-hash');
+  mocks.limit.mockReset();
   mocks.limit.mockResolvedValue([]);
   mocks.returning.mockResolvedValue([user]);
   mocks.db.transaction.mockImplementation((callback) => callback(mocks.db));
@@ -146,6 +147,27 @@ describe('account actions', () => {
     expect(mocks.cookies).not.toHaveBeenCalled();
   });
 
+  it('updates account details and logs activity in a transaction', async () => {
+    const data = { name: 'Updated Name', email: 'updated@example.com' };
+    expect(await updateAccount({}, form(data)))
+      .toEqual({ name: data.name, success: 'accountUpdated' });
+    expect(mocks.db.transaction).toHaveBeenCalledOnce();
+    expect(mocks.set).toHaveBeenCalledWith(data);
+    expect(mocks.db.insert).toHaveBeenCalledOnce();
+  });
+
+  it('deletes the account and logs activity in a transaction', async () => {
+    const deleteCookie = vi.fn();
+    mocks.cookies.mockResolvedValue({ delete: deleteCookie });
+    await expect(deleteAccount({}, form({ password: 'valid-password' })))
+      .rejects.toThrow('redirect:/sign-in');
+    expect(mocks.db.transaction).toHaveBeenCalledOnce();
+    expect(mocks.db.update).toHaveBeenCalledOnce();
+    expect(mocks.db.delete).toHaveBeenCalledOnce();
+    expect(mocks.db.insert).toHaveBeenCalledOnce();
+    expect(deleteCookie).toHaveBeenCalledWith('session');
+  });
+
   it('rejects an invalid invitation before creating a user or session', async () => {
     mocks.returning.mockResolvedValueOnce([]);
     expect(await signUp({}, form({
@@ -169,6 +191,11 @@ describe('account actions', () => {
 describe('team invitations', () => {
   const invite = { email: 'member@example.com', role: 'member' };
 
+  function allowOwner() {
+    mocks.limit.mockReturnValueOnce({ for: vi.fn().mockResolvedValue([{ role: 'owner' }]) });
+    mocks.limit.mockReturnValueOnce({ for: vi.fn().mockResolvedValue([{ id: 10 }]) });
+  }
+
   it('rejects users without a team', async () => {
     mocks.getUserWithTeam.mockResolvedValue({ user, teamId: null });
     expect(await inviteTeamMember({}, form(invite))).toEqual({ error: 'noTeam' });
@@ -177,35 +204,89 @@ describe('team invitations', () => {
   });
 
   it('rejects existing members', async () => {
+    allowOwner();
     mocks.limit.mockResolvedValueOnce([{ user }]);
     expect(await inviteTeamMember({}, form(invite))).toEqual({ error: 'alreadyMember' });
     expect(mocks.db.insert).not.toHaveBeenCalled();
-    const query = new PgDialect().sqlToQuery(mocks.where.mock.calls[0][0]);
+    const query = new PgDialect().sqlToQuery(mocks.where.mock.calls[2][0]);
     expect(query.params).toEqual([invite.email, 10]);
   });
 
   it('rejects an existing pending invitation scoped to the current team', async () => {
+    allowOwner();
     mocks.limit.mockResolvedValueOnce([]).mockResolvedValueOnce([{ id: 2 }]);
     expect(await inviteTeamMember({}, form(invite))).toEqual({ error: 'invitationExists' });
     expect(mocks.db.insert).not.toHaveBeenCalled();
-    const query = new PgDialect().sqlToQuery(mocks.where.mock.calls[1][0]);
+    const query = new PgDialect().sqlToQuery(mocks.where.mock.calls[3][0]);
     expect(query.params).toEqual([invite.email, 10, 'pending']);
   });
 
   it('creates an invitation for the current team when no duplicate exists', async () => {
+    allowOwner();
     expect(await inviteTeamMember({}, form(invite))).toEqual({ success: 'invitationSent' });
+    expect(mocks.db.transaction).toHaveBeenCalledOnce();
     expect(mocks.db.insert).toHaveBeenCalledWith(invitations);
     expect(mocks.values).toHaveBeenCalledWith({
       ...invite, teamId: 10, invitedBy: 1, status: 'pending'
     });
+    expect(mocks.values).toHaveBeenCalledWith(expect.objectContaining({
+      teamId: 10, userId: 1, action: 'INVITE_TEAM_MEMBER'
+    }));
   });
 
-  it('rejects a string member id because the current schema requires a number', async () => {
-    expect(await removeTeamMember({}, form({ memberId: '2' }))).toEqual({ error: 'invalid' });
+  it.each([
+    { memberships: [{ role: 'member' }] },
+    { memberships: [] }
+  ])(
+    'rejects invitation when the current team membership is not owner',
+    async ({ memberships }) => {
+      const forUpdate = vi.fn().mockResolvedValue(memberships);
+      mocks.limit.mockReturnValue({ for: forUpdate });
+      expect(await inviteTeamMember({}, form(invite))).toEqual({ error: 'inviteOwnerRequired' });
+      expect(forUpdate).toHaveBeenCalledWith('update');
+      expect(mocks.db.insert).not.toHaveBeenCalled();
+    }
+  );
+
+  it('accepts a FormData member ID and scopes the deletion to the team', async () => {
+    const forUpdate = vi.fn().mockResolvedValue([{ role: 'owner' }]);
+    mocks.limit.mockReturnValueOnce({ for: forUpdate });
+    expect(await removeTeamMember({}, form({ memberId: '2' }))).toEqual({ success: 'memberRemoved' });
+    expect(forUpdate).toHaveBeenCalledWith('update');
+    expect(mocks.db.transaction).toHaveBeenCalledOnce();
+    expect(new PgDialect().sqlToQuery(mocks.updateWhere.mock.calls[0][0]).params)
+      .toEqual([2, 10]);
+    expect(mocks.values).toHaveBeenCalledWith(expect.objectContaining({
+      teamId: 10, userId: 1, action: 'REMOVE_TEAM_MEMBER'
+    }));
+  });
+
+  it.each(['', '0', '-1', '1.5', '2abc', ' 2', '2147483648', '9007199254740992'])(
+    'rejects invalid member ID %j before a transaction', async (memberId) => {
+      expect(await removeTeamMember({}, form({ memberId }))).toEqual({ error: 'invalid' });
+      expect(mocks.db.transaction).not.toHaveBeenCalled();
+      expect(mocks.db.delete).not.toHaveBeenCalled();
+    }
+  );
+
+  it('requires a team before removing a member', async () => {
+    mocks.getUserWithTeam.mockResolvedValue({ user, teamId: null });
+    expect(await removeTeamMember({}, form({ memberId: '2' }))).toEqual({ error: 'noTeam' });
+    expect(mocks.db.transaction).not.toHaveBeenCalled();
+  });
+
+  it('does not remove a member when the actor is not an owner', async () => {
+    mocks.limit.mockReturnValueOnce({ for: vi.fn().mockResolvedValue([{ role: 'member' }]) });
+    expect(await removeTeamMember({}, form({ memberId: '2' }))).toEqual({ error: 'ownerRequired' });
     expect(mocks.db.delete).not.toHaveBeenCalled();
+    expect(mocks.db.insert).not.toHaveBeenCalled();
   });
 
-  it.todo('accepts a member id submitted by a normal FormData form');
-  it.todo('prevents non-owners from inviting or removing team members');
-  it.todo('prevents removing a member from another team');
+  it('reports an unknown member without logging a removal', async () => {
+    mocks.limit.mockReturnValueOnce({ for: vi.fn().mockResolvedValue([{ role: 'owner' }]) });
+    mocks.returning.mockResolvedValueOnce([]);
+    expect(await removeTeamMember({}, form({ memberId: '2' }))).toEqual({ error: 'memberNotFound' });
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+  });
+
 });

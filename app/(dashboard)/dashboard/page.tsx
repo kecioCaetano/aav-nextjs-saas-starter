@@ -99,11 +99,19 @@ function TeamMembersSkeleton() {
 
 function TeamMembers() {
   const t = useTranslations('Team');
-  const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
+  const { data: teamData, mutate: refreshTeam } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
+  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const isOwner = teamData?.teamMembers?.some(
+    (member) => member.userId === user?.id && member.role === 'owner'
+  );
   const [removeState, removeAction, isRemovePending] = useActionState<
     ActionState,
     FormData
-  >(removeTeamMember, {});
+  >(async (state, formData) => {
+    const result = await removeTeamMember(state, formData);
+    if ('success' in result && result.success) await refreshTeam();
+    return result;
+  }, {});
 
   const getUserDisplayName = (user: Pick<User, 'id' | 'name' | 'email'>) => {
     return user.name || user.email || t('unknownUser');
@@ -129,7 +137,7 @@ function TeamMembers() {
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">
-          {teamData.teamMembers.map((member, index) => (
+          {teamData.teamMembers.map((member) => (
             <li key={member.id} className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <Avatar>
@@ -158,7 +166,7 @@ function TeamMembers() {
                   </p>
                 </div>
               </div>
-              {index > 1 ? (
+              {isOwner && member.userId !== user?.id ? (
                 <form action={removeAction}>
                   <input type="hidden" name="memberId" value={member.id} />
                   <Button
@@ -176,6 +184,9 @@ function TeamMembers() {
         </ul>
         {removeState?.error && (
           <p className="text-red-500 mt-4">{removeState.error}</p>
+        )}
+        {removeState?.success && (
+          <p className="text-green-500 mt-4">{removeState.success}</p>
         )}
       </CardContent>
     </Card>
@@ -196,7 +207,10 @@ function InviteTeamMemberSkeleton() {
 function InviteTeamMember() {
   const t = useTranslations('Team');
   const { data: user } = useSWR<User>('/api/user', fetcher);
-  const isOwner = user?.role === 'owner';
+  const { data: teamData } = useSWR<TeamDataWithMembers>('/api/team', fetcher);
+  const isOwner = teamData?.teamMembers?.some(
+    (member) => member.userId === user?.id && member.role === 'owner'
+  );
   const [inviteState, inviteAction, isInvitePending] = useActionState<
     ActionState,
     FormData

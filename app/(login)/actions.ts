@@ -106,6 +106,7 @@ const signUpSchema = z.object({
   inviteId: z.string().optional()
 });
 
+
 class SignupUserAlreadyExists extends Error {}
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
@@ -303,31 +304,34 @@ export const deleteAccount = validatedActionWithUser(
 
     const userWithTeam = await getUserWithTeam(user.id);
 
-    await logActivity(
-      userWithTeam?.teamId,
-      user.id,
-      ActivityType.DELETE_ACCOUNT
-    );
+    await db.transaction(async (tx) => {
+      await logActivity(
+        userWithTeam?.teamId,
+        user.id,
+        ActivityType.DELETE_ACCOUNT,
+        undefined,
+        tx
+      );
 
-    // Soft delete
-    await db
-      .update(users)
-      .set({
-        deletedAt: sql`CURRENT_TIMESTAMP`,
-        email: sql`CONCAT(email, '-', id, '-deleted')` // Ensure email uniqueness
-      })
-      .where(eq(users.id, user.id));
+      await tx
+        .update(users)
+        .set({
+          deletedAt: sql`CURRENT_TIMESTAMP`,
+          email: sql`CONCAT(email, '-', id, '-deleted')` // Ensure email uniqueness
+        })
+        .where(eq(users.id, user.id));
 
-    if (userWithTeam?.teamId) {
-      await db
-        .delete(teamMembers)
-        .where(
-          and(
-            eq(teamMembers.userId, user.id),
-            eq(teamMembers.teamId, userWithTeam.teamId)
-          )
-        );
-    }
+      if (userWithTeam?.teamId) {
+        await tx
+          .delete(teamMembers)
+          .where(
+            and(
+              eq(teamMembers.userId, user.id),
+              eq(teamMembers.teamId, userWithTeam.teamId)
+            )
+          );
+      }
+    });
 
     (await cookies()).delete('session');
     redirect('/sign-in');
@@ -346,17 +350,27 @@ export const updateAccount = validatedActionWithUser(
     const t = await getTranslations('ActionMessages');
     const userWithTeam = await getUserWithTeam(user.id);
 
-    await Promise.all([
-      db.update(users).set({ name, email }).where(eq(users.id, user.id)),
-      logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_ACCOUNT)
-    ]);
+    await db.transaction(async (tx) => {
+      await tx.update(users).set({ name, email }).where(eq(users.id, user.id));
+      await logActivity(
+        userWithTeam?.teamId,
+        user.id,
+        ActivityType.UPDATE_ACCOUNT,
+        undefined,
+        tx
+      );
+    });
 
     return { name, success: t('accountUpdated') };
   }
 );
 
 const removeTeamMemberSchema = z.object({
-  memberId: z.number()
+  memberId: z
+    .string()
+    .regex(/^[1-9]\d*$/)
+    .transform(Number)
+    .refine((id) => Number.isSafeInteger(id) && id <= 2147483647)
 });
 
 export const removeTeamMember = validatedActionWithUser(
@@ -370,22 +384,32 @@ export const removeTeamMember = validatedActionWithUser(
       return { error: t('noTeam') };
     }
 
-    await db
-      .delete(teamMembers)
-      .where(
-        and(
-          eq(teamMembers.id, memberId),
-          eq(teamMembers.teamId, userWithTeam.teamId)
-        )
-      );
+    const teamId = userWithTeam.teamId;
+    const outcome = await db.transaction(async (tx) => {
+      const [membership] = await tx
+        .select()
+        .from(teamMembers)
+        .where(and(eq(teamMembers.userId, user.id), eq(teamMembers.teamId, teamId)))
+        .limit(1)
+        .for('update');
 
-    await logActivity(
-      userWithTeam.teamId,
-      user.id,
-      ActivityType.REMOVE_TEAM_MEMBER
-    );
+      if (!membership || membership.role !== 'owner') return 'ownerRequired' as const;
+      if (membership.id === memberId) return 'cannotRemoveSelf' as const;
 
-    return { success: t('memberRemoved') };
+      const [removed] = await tx
+        .delete(teamMembers)
+        .where(and(eq(teamMembers.id, memberId), eq(teamMembers.teamId, teamId)))
+        .returning({ id: teamMembers.id });
+
+      if (!removed) return 'memberNotFound' as const;
+
+      await logActivity(teamId, user.id, ActivityType.REMOVE_TEAM_MEMBER, undefined, tx);
+      return 'memberRemoved' as const;
+    });
+
+    return outcome === 'memberRemoved'
+      ? { success: t(outcome) }
+      : { error: t(outcome) };
   }
 );
 
@@ -405,54 +429,61 @@ export const inviteTeamMember = validatedActionWithUser(
       return { error: t('noTeam') };
     }
 
-    const existingMember = await db
-      .select()
-      .from(users)
-      .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
-      .where(
-        and(eq(users.email, email), eq(teamMembers.teamId, userWithTeam.teamId))
-      )
-      .limit(1);
+    const teamId = userWithTeam.teamId;
+    const outcome = await db.transaction(async (tx) => {
+      const [membership] = await tx
+        .select()
+        .from(teamMembers)
+        .where(and(eq(teamMembers.userId, user.id), eq(teamMembers.teamId, teamId)))
+        .limit(1)
+        .for('update');
 
-    if (existingMember.length > 0) {
-      return { error: t('alreadyMember') };
-    }
+      if (!membership || membership.role !== 'owner') return 'inviteOwnerRequired' as const;
 
-    // Check if there's an existing invitation
-    const existingInvitation = await db
-      .select()
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.email, email),
-          eq(invitations.teamId, userWithTeam.teamId),
-          eq(invitations.status, 'pending')
+      // Serialize invitation checks for the team, including requests by different owners.
+      const [team] = await tx.select().from(teams).where(eq(teams.id, teamId)).limit(1).for('update');
+      if (!team) throw new Error('Team not found');
+
+      const existingMember = await tx
+        .select()
+        .from(users)
+        .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
+        .where(and(eq(users.email, email), eq(teamMembers.teamId, teamId)))
+        .limit(1);
+
+      if (existingMember.length > 0) return 'alreadyMember' as const;
+
+      const existingInvitation = await tx
+        .select()
+        .from(invitations)
+        .where(
+          and(
+            eq(invitations.email, email),
+            eq(invitations.teamId, teamId),
+            eq(invitations.status, 'pending')
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
 
-    if (existingInvitation.length > 0) {
-      return { error: t('invitationExists') };
-    }
+      if (existingInvitation.length > 0) return 'invitationExists' as const;
 
-    // Create a new invitation
-    await db.insert(invitations).values({
-      teamId: userWithTeam.teamId,
-      email,
-      role,
-      invitedBy: user.id,
-      status: 'pending'
+      await tx.insert(invitations).values({
+        teamId,
+        email,
+        role,
+        invitedBy: user.id,
+        status: 'pending'
+      });
+
+      await logActivity(teamId, user.id, ActivityType.INVITE_TEAM_MEMBER, undefined, tx);
+      return 'invitationSent' as const;
     });
-
-    await logActivity(
-      userWithTeam.teamId,
-      user.id,
-      ActivityType.INVITE_TEAM_MEMBER
-    );
 
     // TODO: Send invitation email and include ?inviteId={id} to sign-up URL
     // await sendInvitationEmail(email, userWithTeam.team.name, role)
 
-    return { success: t('invitationSent') };
+    return outcome === 'invitationSent'
+      ? { success: t(outcome) }
+      : { error: t(outcome) };
   }
 );
