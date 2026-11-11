@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { english, signup } from './helpers.mjs';
+import { english, signout, signup } from './helpers.mjs';
 
 for (const viewport of [{ width: 375, height: 812 }, { width: 1440, height: 900 }]) {
   test(`auth controls and dashboard navigation remain usable at ${viewport.width}px`, async ({ page, context, baseURL }) => {
@@ -22,5 +22,6 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 1440, height: 900 
     await page.getByRole('link', { name: 'Security' }).click();
     await expect(page.getByRole('heading', { name: 'Security Settings' })).toBeVisible();
     await expect(page.getByLabel('Current Password')).toBeVisible();
+    await signout(page);
   });
 }

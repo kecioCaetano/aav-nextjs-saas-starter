@@ -18,7 +18,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="max-w-48 mx-auto flex justify-center py-2 px-4 border border-gray-300 dark:border-border rounded-full shadow-sm text-sm font-medium text-gray-700 dark:text-foreground bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+          className="max-w-48 mx-auto flex justify-center py-2 px-4 border border-gray-300 dark:border-border rounded-sm shadow-sm text-sm font-medium text-gray-700 dark:text-foreground bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
         >
           {t('back')}
         </Link>

@@ -16,7 +16,12 @@
     "historicYardAlt": "Fotografia histórica de um pátio de processamento de sucata",
     "ctaEyebrow": "Um caminho mais claro",
     "ctaTitle": "Transforme seus dados em oportunidades.",
-    "ctaDescription": "Organize suas operações, automatize seus fluxos de trabalho mais exigentes e descubra o valor oculto nos seus dados. Entre e comece a construir seu sucesso."
+    "ctaDescription": "Organize suas operações, automatize seus fluxos de trabalho mais exigentes e descubra o valor oculto nos seus dados. Entre e comece a construir seu sucesso.",
+    "carouselDescription": "carrossel",
+    "slideDescription": "slide",
+    "slideLabel": "Slide",
+    "carouselPrevious": "Slide anterior",
+    "carouselNext": "Próximo slide"
   },
   "HomePage": {
     "title": "Bem-vindo ao sistema Golden Junk",
@@ -36,6 +41,7 @@
     "copy": "Copiar para a área de transferência"
   },
   "Menu": {
+    "welcome": "Boas-vindas",
     "team": "Equipe",
     "general": "Geral",
     "activity": "Atividade",

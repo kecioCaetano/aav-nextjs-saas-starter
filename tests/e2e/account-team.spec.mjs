@@ -23,6 +23,7 @@ test('updates the password and signs in with the new password', async ({ page })
 
 test('invites a member and accepts the invitation through sign up', async ({ page, browser, baseURL }) => {
   await signup(page);
+  await page.goto('/dashboard/team');
   const email = uniqueEmail();
   await page.getByLabel('Email', { exact: true }).fill(email);
   await page.getByRole('button', { name: 'Invite Member' }).click();
@@ -43,6 +44,7 @@ test('invites a member and accepts the invitation through sign up', async ({ pag
     await invitee.goto(`${baseURL}/sign-up?inviteId=${invitation.id}`);
     await submitAuth(invitee, email, password, 'signup');
     await expect(invitee).toHaveURL(/\/dashboard$/);
+    await invitee.goto(`${baseURL}/dashboard/team`);
     await expect(invitee.getByText(email, { exact: true })).toBeVisible();
     await expect(invitee.getByText('You must be a team owner to invite new members.')).toBeVisible();
     const verify = postgres(process.env.E2E_DATABASE_URL, { max: 1 });
@@ -69,6 +71,7 @@ test('invites a member and accepts the invitation through sign up', async ({ pag
 
 test('the invitation controls are disabled for a member', async ({ page }) => {
   const email = await signup(page);
+  await page.goto('/dashboard/team');
   const sql = postgres(process.env.E2E_DATABASE_URL, { max: 1 });
   try {
     await sql`UPDATE users SET role = 'member' WHERE email = ${email}`;
@@ -87,6 +90,7 @@ test('the invitation controls are disabled for a member', async ({ page }) => {
 
 test('removes a team member and updates the member list', async ({ page }) => {
   const ownerEmail = await signup(page);
+  await page.goto('/dashboard/team');
   const firstEmail = uniqueEmail();
   const secondEmail = uniqueEmail();
   const sql = postgres(process.env.E2E_DATABASE_URL, { max: 1 });
@@ -126,6 +130,7 @@ test('removes a team member and updates the member list', async ({ page }) => {
 
 test('a member cannot bypass disabled invitation controls', async ({ page }) => {
   const memberEmail = await signup(page);
+  await page.goto('/dashboard/team');
   const inviteEmail = uniqueEmail();
   const sql = postgres(process.env.E2E_DATABASE_URL, { max: 1 });
   try {

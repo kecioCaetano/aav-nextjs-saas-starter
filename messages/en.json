@@ -16,7 +16,12 @@
     "historicYardAlt": "Historic photograph of a scrap processing yard",
     "ctaEyebrow": "A clearer way forward",
     "ctaTitle": "Turn your data into opportunity.",
-    "ctaDescription": "Cut through the clutter, automate your heaviest workflows, and uncover hidden value in your data. Step inside and start engineering your success."
+    "ctaDescription": "Cut through the clutter, automate your heaviest workflows, and uncover hidden value in your data. Step inside and start engineering your success.",
+    "carouselDescription": "carousel",
+    "slideDescription": "slide",
+    "slideLabel": "Slide",
+    "carouselPrevious": "Previous slide",
+    "carouselNext": "Next slide"
   },
   "HomePage": {
     "title": "Welcome to the Proller solution system",
@@ -36,6 +41,7 @@
     "copy": "Copy to clipboard"
   },
   "Menu": {
+    "welcome": "Welcome",
     "team": "Team",
     "general": "General",
     "activity": "Activity",

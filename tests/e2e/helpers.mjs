@@ -18,13 +18,15 @@ export async function signup(page, email = uniqueEmail()) {
   await page.goto('/sign-up');
   await submitAuth(page, email, password, 'signup');
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole('heading', { name: 'Team Settings' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Welcome' })).toHaveAttribute('aria-current', 'page');
   return email;
 }
 
 export async function signout(page) {
-  const trigger = page.locator('header button[data-slot="dropdown-menu-trigger"]').last();
-  await trigger.click();
-  await page.getByText('Sign out', { exact: true }).click();
+  const toggleSidebar = page.getByRole('button', { name: 'Toggle sidebar' });
+  if (await toggleSidebar.isVisible()) await toggleSidebar.click();
+  const settings = page.getByRole('button', { name: 'Settings', exact: true });
+  if (await settings.getAttribute('aria-expanded') === 'false') await settings.click();
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
 }

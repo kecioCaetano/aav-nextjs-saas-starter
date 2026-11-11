@@ -16,7 +16,12 @@
     "historicYardAlt": "Fotografía histórica de un patio de procesamiento de chatarra",
     "ctaEyebrow": "Un camino más claro",
     "ctaTitle": "Convierte tus datos en oportunidades.",
-    "ctaDescription": "Organiza tus operaciones, automatiza tus procesos más exigentes y descubre el valor oculto en tus datos. Entra y empieza a construir tu éxito."
+    "ctaDescription": "Organiza tus operaciones, automatiza tus procesos más exigentes y descubre el valor oculto en tus datos. Entra y empieza a construir tu éxito.",
+    "carouselDescription": "carrusel",
+    "slideDescription": "diapositiva",
+    "slideLabel": "Diapositiva",
+    "carouselPrevious": "Diapositiva anterior",
+    "carouselNext": "Diapositiva siguiente"
   },
   "HomePage": {
     "title": "Bienvenido al sistema Golden Junk",
@@ -36,6 +41,7 @@
     "copy": "Copiar al portapapeles"
   },
   "Menu": {
+    "welcome": "Bienvenida",
     "team": "Equipo",
     "general": "General",
     "activity": "Actividad",

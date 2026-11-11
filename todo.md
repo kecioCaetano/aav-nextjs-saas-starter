@@ -51,3 +51,24 @@ Waste Fuel, Tanks & Filters > containers
 auto recycler self-serve yard?
 
 change on Linkedin tittle for: forward deployed engineer (FDE)
+
+An auto recycler self-serve yard (often called a "U-Pull-It" or "Pick-and-Pull") is a salvage yard where you bring your own tools, walk out into the lot, and remove the used car parts yourself.
+
+---
+
+Site > Quotes
+
+Modulo:
+Acquisition > Quotes, orders
+Inventory > Vehicles, parts
+Calender
+
+Mobile app > ?
+
+---
+
+list pick cars: 0. amt of drivers
+
+1. the seller has a flexible pickup date? time?
+2. the time is what matters
+   https://www.geoapify.com/
