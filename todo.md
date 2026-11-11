@@ -30,6 +30,8 @@ managing assets.
 
 check Effect TypeScript library, for future
 
+Connecticut Department of Energy and Environmental Protection (DEEP)
+
 https://portal.ct.gov/deep/p2/industry/vehicle-repair-and-body-shops-p2-fact-sheet-index
 Antifreeze > keep in containers for recycling
 batteries (lead) > keep storage to recycle
@@ -43,6 +45,8 @@ automatic transmission fluid, power steering fluid, liquid and semi-solid gear, 
 bearing lubricants, and hydraulic fluid. Used oils can be mixed and managed together.
 
 Waste Fuel, Tanks & Filters > containers
+
+---
 
 auto recycler self-serve yard?
 
