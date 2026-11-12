@@ -6,6 +6,7 @@ test.beforeEach(async ({ context, baseURL }) => english(context, baseURL));
 test('sign up, sign out and sign back in', async ({ page }) => {
   const email = await signup(page);
   await expect(page.locator('header [data-slot="dropdown-menu-trigger"]')).toHaveCount(0);
+  await expect(page.locator('header').getByRole('link', { name: 'Dashboard', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await signout(page);
   await page.goto('/sign-in');

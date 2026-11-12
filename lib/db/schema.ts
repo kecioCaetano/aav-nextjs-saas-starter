@@ -5,8 +5,173 @@ import {
   text,
   timestamp,
   integer,
+  boolean,
+  numeric,
+  pgEnum,
+  index,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+
+export const companies = pgTable('tb_companies', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+});
+
+export const addresses = pgTable('tb_addresses', {
+  id: serial('id').primaryKey(),
+  addressLine1: text('address_line1'),
+  addressLine2: text('address_line2'),
+  city: text('city').notNull(),
+  state: text('state').notNull(),
+  postalCode: text('postal_code').notNull(),
+  countryCode: text('country_code').notNull(),
+  addressType: text('address_type'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at'),
+  deletedAt: timestamp('deleted_at'),
+});
+
+export const pessoaType = pgEnum('pessoa_type', ['llc', 'person']);
+
+export const pessoas = pgTable('tb_people', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  zipcode: text('zipcode').notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  note: text('note'),
+  type: pessoaType('type').notNull().default('person'),
+  companyId: integer('company_id').references(() => companies.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at'),
+  deletedAt: timestamp('deleted_at'),
+}, (table) => [
+  index('tb_pessoa_email_idx').on(table.email),
+]);
+
+export const peopleAddresses = pgTable('tb_people_addresses', {
+  peopleId: integer('people_id')
+    .notNull()
+    .references(() => pessoas.id),
+  addressesId: integer('addresses_id')
+    .notNull()
+    .references(() => addresses.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
+});
+
+export const menus = pgTable('tb_menus', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  url: text('url'),
+  menuId: integer('menu_id').references((): AnyPgColumn => menus.id),
+});
+
+export const makes = pgTable('tb_makes', {
+  id: serial('id').primaryKey(),
+  description: text('description').notNull(),
+});
+
+export const models = pgTable('tb_models', {
+  id: serial('id').primaryKey(),
+  description: text('description').notNull(),
+});
+
+export const trims = pgTable('tb_trims', {
+  id: serial('id').primaryKey(),
+  description: text('description').notNull(),
+});
+
+export const conditions = pgTable('tb_conditions', {
+  id: serial('id').primaryKey(),
+  description: text('description').notNull(),
+});
+
+export const vehicleOwnership = pgEnum('vehicle_ownership', ['paid-off', 'loan', 'lease']);
+export const vehicleTitle = pgEnum('vehicle_title', ['clean', 'salvage', 'non-repairable', 'no title']);
+
+export const vehicles = pgTable('tb_vehicles', {
+  id: serial('id').primaryKey(),
+  vim: text('vim').notNull(),
+  year: integer('year').notNull(),
+  make: integer('make').notNull().references(() => makes.id),
+  model: integer('model').notNull().references(() => models.id),
+  trims: integer('trims').references(() => trims.id),
+  mileage: integer('mileage'),
+  fuelTypePrimary: text('fuel_type_primary'),
+  type: text('type'),
+  note: text('note'),
+  ownership: vehicleOwnership('ownership'),
+  title: vehicleTitle('title'),
+  plate: text('plate'),
+  companyId: integer('company_id').notNull().references(() => companies.id),
+  latitude: numeric('latitude', { precision: 9, scale: 6 }),
+  longitude: numeric('longitude', { precision: 9, scale: 6 }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at'),
+  deletedAt: timestamp('deleted_at'),
+}, (table) => [
+  index('tb_vehicles_vim_idx').on(table.vim),
+]);
+
+export const vehicleConditions = pgTable('tb_vehicle_conditions', {
+  vehicleId: integer('vehicle_id')
+    .notNull()
+    .references(() => vehicles.id),
+  conditionsId: integer('conditions_id')
+    .notNull()
+    .references(() => conditions.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
+});
+
+export const quoteOrigemType = pgEnum('quote_origem_type', ['online', 'app', 'phone']);
+export const quoteStatus = pgEnum('quote_status', ['pending', 'processing', 'analysed']);
+
+export const quotes = pgTable('tb_quotes', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity({ startWith: 10000 }),
+  year: integer('year').notNull(),
+  makeId: integer('make_id').notNull().references(() => makes.id),
+  modelsId: integer('models_id').notNull().references(() => models.id),
+  trimsId: integer('trims_id').references(() => trims.id),
+  fullName: text('full_name').notNull(),
+  zipCode: text('zip_code').notNull(),
+  phone: text('phone').notNull(),
+  description: text('description'),
+  origemType: quoteOrigemType('origem_type'),
+  status: quoteStatus('status'),
+  value: numeric('value'),
+  note: text('note'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const orders = pgTable('tb_orders', {
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity({ startWith: 20000 }),
+  peopleId: integer('people_id').notNull().references(() => pessoas.id),
+  quotesId: integer('quotes_id').references(() => quotes.id),
+  cost: numeric('cost').notNull(),
+  dtTowing: timestamp('dt_towing'),
+  dtOpen: timestamp('dt_open').notNull().defaultNow(),
+  dtProcessing: timestamp('dt_processing'),
+  dtClosed: timestamp('dt_closed'),
+});
+
+export const ordersVehicles = pgTable('tb_orders_vehicles', {
+  id: serial('id').primaryKey(),
+  vehiclesId: integer('vehicles_id').notNull().references(() => vehicles.id),
+  ordersId: integer('orders_id').notNull().references(() => orders.id),
+  addressesId: integer('addresses_id').references(() => addresses.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
+});
+
+export const quotesPhotos = pgTable('tb_quotes_photos', {
+  id: serial('id').primaryKey(),
+  quotesId: integer('quotes_id').references(() => quotes.id),
+  vehicleId: integer('vehicle_id').references(() => vehicles.id),
+  urlPhoto: text('url_photo').notNull(),
+  type: text('type').notNull(),
+});
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -17,6 +182,28 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
+});
+
+export const companiesUsers = pgTable('tb_companies_users', {
+  id: serial('id').primaryKey(),
+  companiesId: integer('companies_id')
+    .notNull()
+    .references(() => companies.id),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
+});
+
+export const companiesUsersMenus = pgTable('tb_companies_users_menus', {
+  companyUsersId: integer('company_users_id')
+    .notNull()
+    .references(() => companiesUsers.id),
+  menuId: integer('menu_id')
+    .notNull()
+    .references(() => menus.id),
+  readOnly: boolean('read-only').notNull().default(false),
 });
 
 export const teams = pgTable('teams', {
@@ -112,6 +299,40 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
   }),
 }));
 
+export type Company = typeof companies.$inferSelect;
+export type NewCompany = typeof companies.$inferInsert;
+export type Address = typeof addresses.$inferSelect;
+export type NewAddress = typeof addresses.$inferInsert;
+export type Pessoa = typeof pessoas.$inferSelect;
+export type NewPessoa = typeof pessoas.$inferInsert;
+export type PeopleAddress = typeof peopleAddresses.$inferSelect;
+export type NewPeopleAddress = typeof peopleAddresses.$inferInsert;
+export type CompanyUser = typeof companiesUsers.$inferSelect;
+export type NewCompanyUser = typeof companiesUsers.$inferInsert;
+export type CompanyUserMenu = typeof companiesUsersMenus.$inferSelect;
+export type NewCompanyUserMenu = typeof companiesUsersMenus.$inferInsert;
+export type Menu = typeof menus.$inferSelect;
+export type NewMenu = typeof menus.$inferInsert;
+export type Make = typeof makes.$inferSelect;
+export type NewMake = typeof makes.$inferInsert;
+export type Model = typeof models.$inferSelect;
+export type NewModel = typeof models.$inferInsert;
+export type Trim = typeof trims.$inferSelect;
+export type NewTrim = typeof trims.$inferInsert;
+export type Condition = typeof conditions.$inferSelect;
+export type NewCondition = typeof conditions.$inferInsert;
+export type Vehicle = typeof vehicles.$inferSelect;
+export type NewVehicle = typeof vehicles.$inferInsert;
+export type VehicleCondition = typeof vehicleConditions.$inferSelect;
+export type NewVehicleCondition = typeof vehicleConditions.$inferInsert;
+export type Quote = typeof quotes.$inferSelect;
+export type NewQuote = typeof quotes.$inferInsert;
+export type Order = typeof orders.$inferSelect;
+export type NewOrder = typeof orders.$inferInsert;
+export type OrderVehicle = typeof ordersVehicles.$inferSelect;
+export type NewOrderVehicle = typeof ordersVehicles.$inferInsert;
+export type QuotePhoto = typeof quotesPhotos.$inferSelect;
+export type NewQuotePhoto = typeof quotesPhotos.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;

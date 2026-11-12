@@ -21,7 +21,9 @@
     "slideDescription": "slide",
     "slideLabel": "Slide",
     "carouselPrevious": "Previous slide",
-    "carouselNext": "Next slide"
+    "carouselNext": "Next slide",
+    "carouselPause": "Pause slide rotation",
+    "carouselResume": "Resume slide rotation"
   },
   "HomePage": {
     "title": "Welcome to the Proller solution system",

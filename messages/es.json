@@ -21,7 +21,9 @@
     "slideDescription": "diapositiva",
     "slideLabel": "Diapositiva",
     "carouselPrevious": "Diapositiva anterior",
-    "carouselNext": "Diapositiva siguiente"
+    "carouselNext": "Diapositiva siguiente",
+    "carouselPause": "Pausar rotación de diapositivas",
+    "carouselResume": "Reanudar rotación de diapositivas"
   },
   "HomePage": {
     "title": "Bienvenido al sistema Golden Junk",

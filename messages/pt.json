@@ -21,7 +21,9 @@
     "slideDescription": "slide",
     "slideLabel": "Slide",
     "carouselPrevious": "Slide anterior",
-    "carouselNext": "Próximo slide"
+    "carouselNext": "Próximo slide",
+    "carouselPause": "Pausar rotação dos slides",
+    "carouselResume": "Retomar rotação dos slides"
   },
   "HomePage": {
     "title": "Bem-vindo ao sistema Golden Junk",

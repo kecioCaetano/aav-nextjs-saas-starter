@@ -2,17 +2,27 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 
 import { Button } from "@/components/ui/button";
 
+const ROTATION_INTERVAL = 10000;
+
 export function DashboardWelcomeCarousel() {
   const t = useTranslations("Introduction");
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    breakpoints: { "(prefers-reduced-motion: reduce)": { duration: 0 } },
+  });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [snapCount, setSnapCount] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(true);
+  const [pageVisible, setPageVisible] = useState(false);
 
   const updateSelection = useCallback(() => {
     if (!emblaApi) return;
@@ -32,6 +42,35 @@ export function DashboardWelcomeCarousel() {
     };
   }, [emblaApi, updateSelection]);
 
+  useEffect(() => {
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotion = () => setReducedMotion(motionPreference.matches);
+    const updateVisibility = () => setPageVisible(!document.hidden);
+    updateMotion();
+    updateVisibility();
+    motionPreference.addEventListener("change", updateMotion);
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => {
+      motionPreference.removeEventListener("change", updateMotion);
+      document.removeEventListener("visibilitychange", updateVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!emblaApi || paused || hovered || focused || reducedMotion || !pageVisible) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      if (emblaApi.canScrollNext()) {
+        emblaApi.scrollNext();
+      } else {
+        emblaApi.scrollTo(0);
+      }
+    }, ROTATION_INTERVAL);
+    return () => window.clearTimeout(timer);
+  }, [emblaApi, selectedIndex, paused, hovered, focused, reducedMotion, pageVisible]);
+
   const goToSlide = useCallback(
     (index: number) => emblaApi?.scrollTo(index),
     [emblaApi],
@@ -42,13 +81,20 @@ export function DashboardWelcomeCarousel() {
       aria-label={t("eyebrow")}
       aria-roledescription={t("carouselDescription")}
       className="mx-auto w-4/5 max-w-[44.8rem] px-4 py-6 sm:px-6 sm:py-8"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+      }}
     >
-      <div className="overflow-hidden" ref={emblaRef}>
+      <div className="overflow-hidden" ref={emblaRef} onTouchStart={() => setPaused(true)}>
         <div className="flex touch-pan-y">
           <article
             role="group"
             aria-roledescription={t("slideDescription")}
             aria-label={`${t("slideLabel")} 1`}
+            aria-hidden={selectedIndex !== 0}
             className="min-w-0 flex-[0_0_100%]"
           >
             <div className="grid items-center gap-6">
@@ -91,6 +137,7 @@ export function DashboardWelcomeCarousel() {
             role="group"
             aria-roledescription={t("slideDescription")}
             aria-label={`${t("slideLabel")} 2`}
+            aria-hidden={selectedIndex !== 1}
             className="min-w-0 flex-[0_0_100%]"
           >
             <div className="grid gap-6">
@@ -137,6 +184,7 @@ export function DashboardWelcomeCarousel() {
             role="group"
             aria-roledescription={t("slideDescription")}
             aria-label={`${t("slideLabel")} 3`}
+            aria-hidden={selectedIndex !== 2}
             className="min-w-0 flex-[0_0_100%]"
           >
             <div className="flex min-h-[25.6rem] items-center">
@@ -157,6 +205,17 @@ export function DashboardWelcomeCarousel() {
       </div>
 
       <div className="mt-6 flex items-center justify-between gap-4">
+        {!reducedMotion && (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => setPaused((value) => !value)}
+            aria-label={paused ? t("carouselResume") : t("carouselPause")}
+          >
+            {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+          </Button>
+        )}
         <Button
           type="button"
           variant="outline"

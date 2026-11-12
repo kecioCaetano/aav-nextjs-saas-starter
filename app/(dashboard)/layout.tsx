@@ -15,13 +15,13 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function UserLink() {
   const t = useTranslations("Header");
-  const { data: user } = useSWR<User>("/api/user", fetcher);
+  const { data: user } = useSWR<User | null>("/api/user", fetcher);
+
+  if (user) return null;
 
   return (
     <Button asChild className="rounded-sm">
-      <Link href={user ? "/dashboard" : "/sign-up"}>
-        {user ? t("dashboard") : t("signUp")}
-      </Link>
+      <Link href="/sign-up">{t("signUp")}</Link>
     </Button>
   );
 }

@@ -8,6 +8,139 @@
       "when": 1726443359662,
       "tag": "0000_soft_the_anarchist",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794442526056,
+      "tag": "0001_workable_jackpot",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794442752592,
+      "tag": "0002_low_mentor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794443147645,
+      "tag": "0003_yellow_shinobi_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794443339648,
+      "tag": "0004_amazing_jack_flag",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794443436275,
+      "tag": "0005_stale_tigra",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794443615150,
+      "tag": "0006_demonic_dracula",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794444170709,
+      "tag": "0007_white_lockjaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794444653861,
+      "tag": "0008_tan_king_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794444870059,
+      "tag": "0009_tan_rocket_racer",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794445195129,
+      "tag": "0010_soft_whirlwind",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794445201143,
+      "tag": "0011_wakeful_epoch",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794445815012,
+      "tag": "0012_previous_yellowjacket",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794445923111,
+      "tag": "0013_nervous_darkhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794446031416,
+      "tag": "0014_deep_blue_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1794446177560,
+      "tag": "0015_curvy_gamora",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794446401054,
+      "tag": "0016_living_mikhail_rasputin",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794446454871,
+      "tag": "0017_worried_absorbing_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794447039112,
+      "tag": "0018_graceful_shiver_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794447438481,
+      "tag": "0019_fat_morbius",
+      "breakpoints": true
     }
   ]
 }

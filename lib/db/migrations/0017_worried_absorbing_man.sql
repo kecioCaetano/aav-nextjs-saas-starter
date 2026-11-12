@@ -1,0 +1,1 @@
+ALTER TABLE "tb_quotes_photos" ALTER COLUMN "vehicle_id" DROP NOT NULL;

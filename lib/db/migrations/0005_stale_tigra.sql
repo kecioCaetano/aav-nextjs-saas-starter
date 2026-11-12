@@ -1,0 +1,1 @@
+ALTER TABLE "tb_companies_users_menus" ALTER COLUMN "read-only" SET DEFAULT false;
